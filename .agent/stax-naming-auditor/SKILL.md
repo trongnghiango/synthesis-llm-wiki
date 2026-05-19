@@ -1,7 +1,7 @@
 ---
 name: stax-naming-auditor
 description: "Quét và kiểm toán Naming Convention, Schema, Entities, DTOs, Services. Bảo vệ Ubiquitous Language STAX. CHỈ ĐỌC (READ-ONLY). Phân tầng severity và xuất Fix Manifest."
-globs: "shared/contracts/**/*.ts, server/src/database/schema/**/*.ts, server/src/modules/**/entities/**/*.ts, server/src/modules/**/domain/**/*.ts, server/src/modules/**/dtos/**/*.ts, server/src/modules/**/services/**/*.ts, server/src/modules/**/application/**/*.ts, server/src/modules/**/events/**/*.ts, server/src/modules/**/handlers/**/*.ts, **/*.type.ts, **/*.interface.ts, **/*.event.ts"
+globs: "shared/contracts/**/*.ts, backend/src/database/schema/**/*.ts, backend/src/modules/**/entities/**/*.ts, backend/src/modules/**/domain/**/*.ts, backend/src/modules/**/dtos/**/*.ts, backend/src/modules/**/services/**/*.ts, backend/src/modules/**/application/**/*.ts, backend/src/modules/**/events/**/*.ts, backend/src/modules/**/handlers/**/*.ts, **/*.type.ts, **/*.interface.ts, **/*.event.ts"
 alwaysApply: false
 ---
 
