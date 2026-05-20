@@ -1,14 +1,14 @@
 ---
 title: "Gemini 3.5: frontier intelligence with action"
 source: "https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-3-5/#gemini-3-5-flash"
-author:
-  - "[[Koray Kavukcuoglu]]"
+author: 
 published: 2026-05-20
 created: 2026-05-20
-description: "At Google I/O we released Gemini 3.5, our latest series of models combining frontier intelligence with action."
-tags:
-  - "clippings"
+description: At Google I/O we released Gemini 3.5, our latest series of models combining frontier intelligence with action.
+tags: 
+status: pending
 ---
+
 Gemini 3.5 is built to help you execute complex, agentic workflows.
 
 [![koray](https://storage.googleapis.com/gweb-uniblog-publish-prod/images/koray.max-244x184.format-webp.webp)

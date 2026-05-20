@@ -8,7 +8,7 @@ import urllib.error
 from datetime import datetime
 
 # Directory Paths (Relative to vault root)
-INBOX_DIR = "0-Inbox"
+CLIPPINGS_DIR = "Clippings"
 PROCESSED_DIR = "2-Processed"
 
 # API Settings
@@ -35,7 +35,6 @@ def parse_frontmatter(content):
     Parses YAML frontmatter from markdown file.
     Returns (frontmatter_dict, body_text, original_frontmatter_raw_string)
     """
-    # Pattern to match YAML frontmatter
     match = re.match(r"^---\s*\n(.*?)\n---\s*\n(.*)$", content, re.DOTALL)
     if not match:
         return {}, content, ""
@@ -43,7 +42,6 @@ def parse_frontmatter(content):
     fm_raw = match.group(1)
     body = match.group(2)
 
-    # Simple YAML parser
     fm_dict = {}
     for line in fm_raw.split("\n"):
         if ":" in line:
@@ -51,7 +49,7 @@ def parse_frontmatter(content):
             key = key.strip()
             val = val.strip().strip('"').strip("'")
 
-            # Handle list parsing if applicable (e.g. keywords: [a, b])
+            # Handle list parsing if applicable (e.g. tags: [a, b])
             if val.startswith("[") and val.endswith("]"):
                 items = [i.strip().strip('"').strip("'") for i in val[1:-1].split(",") if i.strip()]
                 fm_dict[key] = items
@@ -70,9 +68,7 @@ def serialize_frontmatter(fm_dict):
             items_str = ", ".join(f'"{i}"' for i in v)
             lines.append(f"{k}: [{items_str}]")
         else:
-            # Escape strings if they contain double quotes or colons
             if isinstance(v, str) and (":" in v or '"' in v or "'" in v):
-                # Escape double quotes
                 safe_v = v.replace('"', '\\"')
                 lines.append(f'{k}: "{safe_v}"')
             else:
@@ -83,7 +79,6 @@ def serialize_frontmatter(fm_dict):
 def make_claude_request(prompt, api_key, model):
     """
     Makes a request to the Anthropic API.
-    Uses standard library urllib to avoid requiring external packages.
     """
     headers = {
         "x-api-key": api_key,
@@ -126,55 +121,40 @@ def make_claude_request(prompt, api_key, model):
         print(f"Error making API request: {e}", file=sys.stderr)
         sys.exit(1)
 
-def process_note(filepath, filename, api_key, model):
-    print(f"\nProcessing: {filename}...")
+def process_clipping(filepath, filename, api_key, model):
+    print(f"\nProcessing Clipping: {filename}...")
 
     with open(filepath, "r", encoding="utf-8") as f:
         content = f.read()
 
     fm_dict, body, fm_raw = parse_frontmatter(content)
 
-    # Determine the title of the note
-    title = fm_dict.get("aliases", [None])[0] if isinstance(fm_dict.get("aliases"), list) else fm_dict.get("aliases")
+    title = fm_dict.get("title")
     if not title:
-        # Try to find first H1 header in the body
-        h1_match = re.search(r"^#\s+(.+)$", body, re.MULTILINE)
-        if h1_match:
-            title = h1_match.group(1).strip()
-        else:
-            # Fallback to filename slug without date prefix
-            title = filename
-            # Strip date prefix e.g. 202604221412-title -> title
-            title_match = re.match(r"^\d+-(.+)$", filename)
-            if title_match:
-                title = title_match.group(1).replace("-", " ").title()
+        title = filename[:-3].replace("-", " ").title()
 
-    # Prompt formulation
-    prompt = f"""You are an expert knowledge curator. Your task is to process a raw note (web clip or article) and synthesize it into a clean, highly structured processed note.
+    # Formulate a Vietnamese-centric prompt to synthesize highly complex content into clean, professional Vietnamese notes.
+    prompt = f"""Bạn là một chuyên gia quản lý tri thức cao cấp (Senior Knowledge Curator) và chuyên gia Phân tích nghiệp vụ (BA)/Kiến trúc sư hệ thống.
+Nhiệm vụ của bạn là đọc bài viết kỹ thuật/tin tức công nghệ thô (thường bằng tiếng Anh) dưới đây, sau đó chắt lọc, tổng hợp và chuyển ngữ nó thành một ghi chú bằng TIẾNG VIỆT cực kỳ dễ hiểu, cô đọng nhưng giữ nguyên các thuật ngữ kỹ thuật chuyên ngành quan trọng.
 
-Please analyze the raw content below and extract:
-1. A very concise 1-2 sentence short summary.
-2. A detailed structured bullet-point summary (AI summary) capturing the core insights, key concepts, arguments, or lessons.
-3. A list of important keywords relevant to the content.
-
-Please output your response strictly as a JSON object with this exact structure:
+Hãy phân tích kỹ lưỡng nội dung và xuất thông tin theo định dạng JSON với cấu trúc chính xác sau:
 {{
-  "short_summary": "1-2 sentence summary here.",
-  "ai_summary": "Detailed bullet-point summary in markdown here.",
-  "keywords": ["keyword1", "keyword2", "keyword3"]
+  "short_summary": "Tóm tắt cực kỳ ngắn gọn từ 1 đến 2 câu phản ánh giá trị cốt lõi của bài viết.",
+  "vietnamese_title": "Tiêu đề Tiếng Việt được dịch nghĩa một cách chuyên nghiệp và cuốn hút.",
+  "ai_summary": "Bản tổng hợp chi tiết bằng tiếng Việt theo định dạng markdown (dùng bullet points), chia nhỏ thành các mục ý nghĩa chính (Key Insights, Giá trị nghiệp vụ, Tác động công nghệ hoặc Kiến trúc nếu có).",
+  "keywords": ["từ-khóa-1", "từ-khóa-2", "từ-khóa-3"]
 }}
 
-Make sure your output is valid JSON and only the JSON object. Do not include any explanations, markdown code fences like ```json, or headers.
+Yêu cầu xuất ra định dạng JSON chuẩn xác và KHÔNG có bất kỳ ký tự giải thích hay định dạng markdown code block nào xung quanh JSON.
 
-Raw Content:
-Title: {title}
-Body:
+Nội dung bài viết thô:
+Tiêu đề gốc: {title}
+Nội dung bài viết:
 {body}
 """
 
     response_text = make_claude_request(prompt, api_key, model)
 
-    # Clean response text in case Claude adds markdown code fences
     clean_json_str = response_text.strip()
     if clean_json_str.startswith("```json"):
         clean_json_str = clean_json_str[7:]
@@ -187,74 +167,76 @@ Body:
     try:
         synthesis = json.loads(clean_json_str)
     except json.JSONDecodeError as e:
-        print(f"Failed to parse JSON response from Claude: {e}")
+        print(f"Failed to parse JSON response: {e}")
         print(f"Raw response was:\n{response_text}")
         return False
 
     short_summary = synthesis.get("short_summary", "")
+    vietnamese_title = synthesis.get("vietnamese_title", f"Processed: {title}")
     ai_summary = synthesis.get("ai_summary", "")
     keywords = synthesis.get("keywords", [])
 
-    # Format keywords as a list of hashtags
+    # Format keywords as hashtags
     hashtags_list = [f"#{kw.lower().replace(' ', '-')}" for kw in keywords]
     hashtags_str = ", ".join(hashtags_list)
 
-    # Write layer 2 note
-    processed_filename = filename
+    # Format output file name: YYYYMMDDHHMM-slug.md
+    slug = re.sub(r'[^a-zA-Z0-9\s-]', '', vietnamese_title.lower())
+    slug = re.sub(r'[\s-]+', '-', slug).strip('-')
+
+    timestamp = datetime.now().strftime('%Y%m%d%H%M')
+    processed_filename = f"{timestamp}-{slug}-processed.md"
     processed_filepath = os.path.join(PROCESSED_DIR, processed_filename)
 
     processed_fm = {
-        "id": fm_dict.get("id", f"{datetime.now().strftime('%Y%m%d%H%M')}-{filename[:-3]}") + "-processed",
-        "aliases": [f"Processed: {title}"],
-        "date": fm_dict.get("date", datetime.now().strftime("%Y-%m-%d")),
+        "id": f"{timestamp}-{slug}-processed",
+        "aliases": [vietnamese_title],
+        "date": datetime.now().strftime("%Y-%m-%d"),
         "type": "processed-note",
-        "source_note": f"[[{INBOX_DIR}/{filename}]]",
-        "tags": ["processed"] + [kw.lower().replace(' ', '-') for kw in keywords[:5]],
+        "source_note": f"[[{CLIPPINGS_DIR}/{filename}]]",
+        "tags": ["processed", "clippings"] + [kw.lower().replace(' ', '-') for kw in keywords[:3]],
         "short_summary": short_summary,
         "keywords": keywords
     }
 
     processed_body = f"""{serialize_frontmatter(processed_fm)}
 
-# Processed: {title}
+# {vietnamese_title}
 
-## 🤖 AI Summary
+## 🤖 Tóm tắt Ngắn (AI Summary)
 > {short_summary}
 
-### Key Takeaways
+## 📝 Chi tiết Nghiên cứu & Chắt lọc Tri thức
 {ai_summary}
 
-### 🔑 Keywords
+### 🔑 Từ khóa kỹ thuật (Keywords)
 {hashtags_str}
 
-### 📝 Core Content Reference
-*Synthesized from raw note: [[{INBOX_DIR}/{filename}|{title}]]*
-
-#### Key Highlights & Raw Text Extracts:
-{body[:2000] + ("..." if len(body) > 2000 else "")}
+---
+*Ghi chú này được dịch nghĩa và chắt lọc tự động từ bản Clipping gốc: [[{CLIPPINGS_DIR}/{filename}|{title}]]*
 """
 
     with open(processed_filepath, "w", encoding="utf-8") as f:
         f.write(processed_body)
-    print(f"Success: Processed note written to {processed_filepath}")
+    print(f"Success: Processed Vietnamese note written to {processed_filepath}")
 
-    # Update raw note frontmatter status to processed
+    # Update raw clipping frontmatter status to processed
     fm_dict["status"] = "processed"
     fm_dict["summary"] = short_summary
     fm_dict["keywords"] = keywords
 
-    updated_raw_content = serialize_frontmatter(fm_dict) + "\n\n" + body.strip() + "\n"
+    updated_clipping_content = serialize_frontmatter(fm_dict) + "\n\n" + body.strip() + "\n"
     with open(filepath, "w", encoding="utf-8") as f:
-        f.write(updated_raw_content)
-    print(f"Success: Raw note {filepath} updated with status: processed.")
+        f.write(updated_clipping_content)
+    print(f"Success: Source Clipping {filepath} updated with status: processed.")
     return True
 
 def main():
     api_key = get_api_key()
     model = os.environ.get("ANTHROPIC_MODEL", DEFAULT_MODEL)
 
-    if not os.path.exists(INBOX_DIR):
-        print(f"Inbox directory '{INBOX_DIR}' does not exist.")
+    if not os.path.exists(CLIPPINGS_DIR):
+        print(f"Clippings directory '{CLIPPINGS_DIR}' does not exist.")
         sys.exit(1)
 
     os.makedirs(PROCESSED_DIR, exist_ok=True)
@@ -262,11 +244,11 @@ def main():
     processed_count = 0
     errors_count = 0
 
-    for filename in os.listdir(INBOX_DIR):
+    for filename in os.listdir(CLIPPINGS_DIR):
         if not filename.endswith(".md"):
             continue
 
-        filepath = os.path.join(INBOX_DIR, filename)
+        filepath = os.path.join(CLIPPINGS_DIR, filename)
         try:
             with open(filepath, "r", encoding="utf-8") as f:
                 content = f.read()
@@ -274,13 +256,22 @@ def main():
             print(f"Error reading file {filename}: {e}")
             continue
 
-        fm_dict, _, _ = parse_frontmatter(content)
+        fm_dict, body, fm_raw = parse_frontmatter(content)
 
-        status = fm_dict.get("status")
-        # Check if the note is designated to be processed
-        if status == "to-process":
+        status = fm_dict.get("status", "pending") # Default status to pending if not present
+
+        # Ensure status is initialized to pending if missing
+        if "status" not in fm_dict:
+            fm_dict["status"] = "pending"
+            updated_content = serialize_frontmatter(fm_dict) + "\n\n" + body.strip() + "\n"
+            with open(filepath, "w", encoding="utf-8") as f:
+                f.write(updated_content)
+            status = "pending"
+
+        # Check if the clipping note is pending to be processed
+        if status == "pending":
             try:
-                success = process_note(filepath, filename, api_key, model)
+                success = process_clipping(filepath, filename, api_key, model)
                 if success:
                     processed_count += 1
                 else:
@@ -289,7 +280,7 @@ def main():
                 print(f"Error processing {filename}: {e}", file=sys.stderr)
                 errors_count += 1
 
-    print(f"\nPipeline finished. Processed: {processed_count} notes. Errors: {errors_count} notes.")
+    print(f"\nClippings pipeline finished. Processed: {processed_count} notes. Errors: {errors_count} notes.")
 
 if __name__ == "__main__":
     main()
