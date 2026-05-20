@@ -1,0 +1,21 @@
+# Task List: Organization Structure
+
+- [x] Define HRM API and types (`shared/contracts/hrm.ts`)
+- [x] Export HRM contracts in `shared/index.ts`
+- [x] Update HRM API client (`modules/hrm/api/hrm.api.ts`)
+- [x] Create visual OrgChart component (`OrgChart.tsx`)
+- [x] Implement main Page Layout (`org-structure.tsx`)
+    - [x] Header & View toggles
+    - [x] Visual Chart View with Framer Motion
+    - [x] Detail Side Panel for Departments
+- [x] Sync with STAX Design Guidelines
+- [x] Create Context Documentation in `docs/context/`
+- [x] Implement Add/Edit Department Forms (Modal integration)
+- [x] Data Binding Robustness (Handled nested API responses)
+- [x] Premium UI & Dark Mode Support (Glassmorphism, High Contrast)
+- [x] Search & Focus: Highlight nodes and animate view to target
+- [x] Drag & Drop Re-parenting: Interactively change hierarchy
+- [x] Export Org Chart to Image/PDF (html-to-image)
+- [x] Fullscreen mode for immersive experience
+- [x] Implement List View for mass department management
+- [x] Permission-based Action Visibility (RBAC integration)

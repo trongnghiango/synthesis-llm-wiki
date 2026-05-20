@@ -1,0 +1,6 @@
+- [x] **REFRESH SCHEMA**: Revert `leads` table columns and add `contact_id`
+- [x] **MIGRATION FIX**: Rewrite `crm-legacy-migration.service.ts` to link leads to contacts correctly
+- [x] **MAPPER FIX**: Update `LeadMapper` to handle `contactId` and joined data
+- [x] **REPOSITORY FIX**: Update `DrizzleLeadRepository` to use `LEFT JOIN` with `contacts`
+- [x] **ENTITY FIX**: Restore missing methods (`assignTo`, `closeAsWon`) and fields (`serviceNeed`, `note`)
+- [x] **VERIFICATION**: Run migration and test API `GET /crm/leads`

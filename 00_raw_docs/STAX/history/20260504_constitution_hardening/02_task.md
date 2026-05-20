@@ -1,0 +1,12 @@
+- [x] **1. Hardening Audit Log System**
+    - [x] Create `LeadStatusChangedEvent`
+    - [x] Create `LeadAssignedEvent`
+    - [x] Modify `LeadWorkflowService` to publish events
+    - [x] Create `FinoteStatusChangedEvent`
+    - [x] Modify `FinoteService` to publish events
+    - [x] Register new events in `AuditDomainEventHandler`
+- [x] **2. Fixing Incomplete Code (Mocks)**
+    - [x] Refactor `BootstrapService` to use real services/repos
+- [x] **3. Consistency & Cleanup**
+    - [x] Update `LeadResponseDto` field naming
+    - [x] Update `LeadQueryService` mapping

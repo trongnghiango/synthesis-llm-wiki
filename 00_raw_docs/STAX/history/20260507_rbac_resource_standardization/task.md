@@ -1,0 +1,4 @@
+- [x] Update `PermissionService` to handle `manage` as a wildcard.
+- [x] Update `01_rbac_rules.csv` (split `hrm` into `employee` & `org`).
+- [x] Update `BootstrapService` (sync UI flags with new resources).
+- [x] Finalize documentation.
