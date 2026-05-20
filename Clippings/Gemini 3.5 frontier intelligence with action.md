@@ -6,7 +6,9 @@ published: 2026-05-20
 created: 2026-05-20
 description: At Google I/O we released Gemini 3.5, our latest series of models combining frontier intelligence with action.
 tags: 
-status: pending
+status: processed
+summary: Google chính thức ra mắt Gemini 3.5 Flash, dòng mô hình tối ưu cho các tác vụ tác nhân tự trị (Agentic AI) và lập trình phức tạp, mang lại hiệu năng vượt trội với tốc độ xử lý nhanh gấp 4 lần mà không đánh đổi chất lượng suy luận.
+keywords: ["Gemini 3.5 Flash", "Agentic AI", "Google Antigravity", "Gemini Spark", "Subagents", "Tác nhân tự trị", "Lập trình AI", "Multimodal"]
 ---
 
 Gemini 3.5 is built to help you execute complex, agentic workflows.

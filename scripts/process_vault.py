@@ -83,7 +83,7 @@ def serialize_frontmatter(fm_dict):
 def make_claude_request(prompt, api_key, model):
     """
     Makes a request to the Anthropic API.
-    Uses standard library urllib to avoid requiring external packages.
+    Handles Server-Sent Events (SSE) stream returned by the local proxy.
     """
     headers = {
         "x-api-key": api_key,
@@ -112,8 +112,29 @@ def make_claude_request(prompt, api_key, model):
     try:
         with urllib.request.urlopen(req) as response:
             res_body = response.read().decode("utf-8")
-            res_json = json.loads(res_body)
-            return res_json["content"][0]["text"]
+
+            # Check if response is Server-Sent Events (SSE) stream
+            if "text/event-stream" in response.headers.get("content-type", ""):
+                full_text = ""
+                for line in res_body.split("\n"):
+                    line = line.strip()
+                    if line.startswith("data:"):
+                        data_str = line[5:].strip()
+                        if data_str == "[DONE]":
+                            continue
+                        try:
+                            data_json = json.loads(data_str)
+                            # Handle different event types in the stream
+                            if data_json.get("type") == "content_block_delta" and "delta" in data_json:
+                                full_text += data_json["delta"].get("text", "")
+                            elif data_json.get("type") == "completion": # fallback for other formats
+                                full_text += data_json.get("completion", "")
+                        except Exception:
+                            pass
+                return full_text.strip()
+            else:
+                res_json = json.loads(res_body)
+                return res_json["content"][0]["text"]
     except urllib.error.HTTPError as e:
         print(f"HTTP Error: {e.code} - {e.reason}", file=sys.stderr)
         try:
