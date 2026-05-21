@@ -1,29 +1,27 @@
 ---
 id: dom-crm-kanban-reports
-title: Quy trình Chuyển Giai đoạn Lead CRM & Kanban
+title: Thiết kế Kanban & Chuyển đổi Trạng thái CRM Lead
 layer: 3-atomic
 parent: "[[04_domain_knowledge]]"
 depends_on:
   - "[[hb-delta-logging]]"
-summary: "Quy tắc chuyển trạng thái Lead CRM qua PATCH API, chặn WON trực tiếp và phát hành sự kiện."
-tags: [crm, lead, kanban, domain-event, validation]
+summary: "Quy trình chuyển đổi trạng thái Lead qua PATCH API, chặn chuyển WON trực tiếp và tích hợp Domain Event kích hoạt ghi nhật ký."
+tags: [crm, kanban, lead-status, domain-event, architecture]
 ---
 
-### 1. Luồng Nghiệp vụ & Thiết kế API
-* **API Endpoint:** `PATCH /crm/leads/:id`
-* **DTO Contract (`shared/contracts/crm.ts`):** `updateLeadSchema` bổ sung `status: z.string().optional()`.
-* **Mapping Nội bộ:** `LeadMapper` ánh xạ trường `status` (Database/DTO) với thuộc tính `stage` (Domain Entity) để đảm bảo tính nhất quán dữ liệu.
+### 1. API & Ánh xạ Dữ liệu (Mapping)
+*   **API Endpoint:** `PATCH /crm/leads/:id`
+    *   Payload DTO sử dụng `updateLeadSchema` (`shared/contracts/crm.ts`) chứa trường tùy chọn `status: z.string().optional()`.
+*   **Data Mapping:** 
+    *   Database schema dùng trường `status` trong khi Domain Entity dùng `stage`.
+    *   Đồng bộ thông qua `LeadMapper` tại tầng Service để đảm bảo tính nhất quán của Domain Model mà không phá vỡ schema hiện tại.
 
-### 2. Ràng buộc Nghiệp vụ Chốt WON
-* **Quy tắc chặn:** Cấm chuyển trực tiếp trạng thái sang `WON` qua API `PATCH`.
-* **Xử lý:** Nếu payload chứa `status: 'WON'` -> Service ném lỗi `BusinessRuleValidationException`.
-* **Luồng hợp lệ cho WON:** Phải gọi qua API chuyên dụng `/crm/leads/:id/won` để thực thi đồng thời nghiệp vụ tạo hợp đồng và khởi tạo phiếu thu.
-* **Các trạng thái cho phép qua PATCH:** `NEW`, `CONSULTING`, `NEGOTIATING`, `LOST`.
+### 2. Ràng buộc Nghiệp vụ (Business Rules)
+*   **Trạng thái hợp lệ:** Cho phép cập nhật trực tiếp qua API PATCH giữa các trạng thái: `NEW`, `CONSULTING`, `NEGOTIATING`, `LOST`.
+*   **Chặn WON trực tiếp:**
+    *   Nếu payload truyền `status: 'WON'`, Service chặn và ném `BusinessRuleValidationException`.
+    *   **Yêu cầu luồng:** Bắt buộc Client mở dialog chuyên dụng và gọi API `/crm/leads/:id/won` để xử lý đồng thời các nghiệp vụ phụ thuộc (tạo hợp đồng, sinh phiếu thu kế toán liên kết với `[[dom-accounting-finote]]`).
 
-### 3. Kiến trúc Event-Driven & Logging
-* Sau khi lưu thay đổi trạng thái Lead thành công vào DB, hệ thống phát hành sự kiện `LeadStatusChangedEvent`.
-* **Subscribers:** Hệ thống Audit Log (chi tiết tại `[[hb-delta-logging]]`) đăng ký nhận sự kiện này để tự động ghi vết lịch sử thay đổi trạng thái (Lead History Log).
-
-### 4. Tích hợp Frontend
-* Cập nhật Kanban qua API: `crmApi.updateLead(leadId, { status: newStage })` (với `newStage` khác `WON`).
-* Trạng thái `WON` yêu cầu mở Dialog/Form riêng để gọi API `/crm/leads/:id/won`.
+### 3. Sự kiện Hệ thống & Audit Log
+*   **Domain Event:** Cập nhật trạng thái thành công kích hoạt phát hành `LeadStatusChangedEvent`.
+*   **Event Handler:** Hệ thống Audit Log đăng ký lắng nghe event này để tự động ghi vết lịch sử thay đổi trạng thái (sử dụng cơ chế ghi nhận tương tự `[[hb-delta-logging]]`).

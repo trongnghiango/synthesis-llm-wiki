@@ -194,9 +194,33 @@ def find_new_feature_sessions():
         if slug in sync_state and sync_state[slug] == folder_hash:
             return True, folder_hash
 
+        # Normalize underscores to hyphens for matching prefix/ID
+        norm_slug = slug.replace("_", "-")
+
         # 2. Check if the file physically exists as backup
         for note in existing_notes:
-            if note.startswith(f"dom-{slug}") or note.startswith(f"hb-{slug}") or note.startswith(f"arch-{slug}") or note.startswith(f"hist-{slug}"):
+            # Check name match using normalized slug
+            name_match = (
+                note.startswith(f"dom-{norm_slug}") or
+                note.startswith(f"hb-{norm_slug}") or
+                note.startswith(f"arch-{norm_slug}") or
+                note.startswith(f"hist-{norm_slug}")
+            )
+
+            # Check semantic content match if name match fails
+            content_match = False
+            if not name_match:
+                note_path = os.path.join(ATOMIC_NODES_DIR, note)
+                try:
+                    with open(note_path, 'r', encoding='utf-8') as f:
+                        # Only read first 1000 characters to keep it fast
+                        head = f.read(1000)
+                        if slug in head or norm_slug in head:
+                            content_match = True
+                except Exception:
+                    pass
+
+            if name_match or content_match:
                 # File exists physically, if it's not in sync_state, let's bootstrap it
                 if folder_hash:
                     sync_state[slug] = folder_hash

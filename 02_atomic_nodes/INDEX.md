@@ -8,6 +8,8 @@ Chào mừng bạn đến với Layer 3 - Hệ thống **Nốt nguyên tử (Ato
 
 | Nốt Nguyên Tử | Tóm tắt (1 dòng) | Phụ thuộc | Tags |
 | :--- | :--- | :--- | :--- |
+| [[arch-google-drive-oauth2]] | Tái cấu trúc Google Drive Integration từ Service Account sang OAuth 2.0 qua REST API và Authorization Code Flow. | *Tự động* | `#infrastructure ` #oauth2 ` #google-drive ` #system-module` |
+| [[arch-audit-crm-accounting-20260509]] | Khắc phục lỗi trùng lặp định danh CRM và rò rỉ dữ liệu đa bên (multi-tenancy) trong module Kế toán. | *Tự động* | `#crm ` #accounting ` #tenant-isolation ` #identity-integrity ` #refactoring` |
 | [[arch-migrate-tanstack-router]] | Chuyển đổi từ wouter sang TanStack Router, nâng cấp Type-Safe Navigation, Router Guards và tối ưu hóa UI Org Chart | *Tự động* | `#routing ` #tanstack-router ` #react ` #layout ` #org-chart` |
 | [[dom-domain-hardening]] | Đóng gói trạng thái thực thể Finote, loại bỏ magic strings và sửa lỗi vi phạm Clean Architecture. | *Tự động* | `#domain-driven-design ` #encapsulation ` #refactoring ` #security ` #clean-architecture` |
 | [[arch-professional-api-integration]] | Tái cấu trúc System Module với Service Layer, chuẩn Backend-Driven UI (_actions) và bổ sung API điều phối/báo cáo. | *Tự động* | `#system-module ` #backend-driven-ui ` #action-dto ` #api-contract` |
@@ -63,6 +65,8 @@ Chào mừng bạn đến với Layer 3 - Hệ thống **Nốt nguyên tử (Ato
 
 | Nốt Nguyên Tử | Tóm tắt (1 dòng) | Phụ thuộc | Tags |
 | :--- | :--- | :--- | :--- |
+| [[dom-standardize-accounting-party]] | Chuẩn hóa thông tin Đối tượng Kế toán (Party) trực tiếp trong finotes phục vụ cách ly Tenant và hiển thị tối ưu không cần JOIN. | *Tự động* | `#accounting ` #database-schema ` #domain-entity ` #tenant-isolation` |
+| [[dom-crm-kanban-reports-fe]] | Thiết kế và giải pháp kỹ thuật frontend cho Kanban Board kéo thả và Dashboard báo cáo CRM. | *Tự động* | `#frontend ` #crm ` #kanban ` #dashboard ` #react-query ` #drag-drop` |
 | [[dom-crm-activity-feed-metadata]] | Chuẩn hóa cơ chế Activity Feed, Audit Trail và liên kết dữ liệu Timeline đa thực thể (Lead, Org, Contract) tích hợp Actor Tracking. | *Tự động* | `#crm ` #activity-feed ` #audit-log ` #metadata ` #event-driven` |
 | [[dom-org-structure-position-api]] | API lấy danh sách vị trí định biên theo đơn vị tổ chức (Org Unit) sử dụng Drizzle ORM và phân quyền org:read. | *Tự động* | `#api ` #org-structure ` #position ` #drizzle ` #authorization` |
 | [[dom-fix_lead_acquired_at_display]] | Đồng bộ LeadResponseDto để trả về đúng trường dữ liệu acquiredAt từ database, khắc phục lỗi hiển thị trùng ngày tạo trên UI Kanban. | *Tự động* | `#crm ` #lead ` #acquired-at ` #dto ` #api` |

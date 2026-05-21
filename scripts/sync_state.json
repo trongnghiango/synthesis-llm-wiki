@@ -42,5 +42,16 @@
   "service_catalog_fe": "7742a04b153f0f947c8b223fcb62074a85372c281afa08094fe2d99be2c9464c",
   "constitution_hardening": "ff6373bae2f9bdce2b37c5a6db3cb7ec344789b2787bc8b08019511d0d67f255",
   "manage_position_department_ui": "a5562c755b345110d95fa0abba8bb0150699e5fd0e722f796842f08fc554c7f5",
-  "ui_components_standardization": "40510781d90f398b0b370af4b65da87637282c05c07780264d0bb8127011a4af"
+  "ui_components_standardization": "40510781d90f398b0b370af4b65da87637282c05c07780264d0bb8127011a4af",
+  "fix_accounting_integration": "7d2643891ecceb5a60f907c464b5e213f7b844aed0adcc4b046f2106c1665c6b",
+  "tasks_management_implementation": "da1b1bd666bf368e88d0ed0eac74dc5bcc3c55497cb1ffe944cb6e4f5e496e9c",
+  "company_stats_aggregation": "6c539d5a16f0bc4bf1ebfe32e2fd726b282de435875e00cadb6d9c2aba3fcf98",
+  "finote_detail_page": "ed8402b0e43ac70e14f9c2d012d0856396d320c7e4cb77c7ff609ec1938a64df",
+  "cash_transfer_sync": "bb7e5a0bd8d2ab8269e63f48904e13b94d886184541d09f4f705c7230e2d9d2c",
+  "cash_book": "5af4be481ad969f5cf467828fa436045f7cd546cb48d82dfa3d5f85992b1a7ed",
+  "crm_kanban_and_reports_frontend": "4f239a292231d593f5af1263f709969df8dbe0ec651ef822d84563b01a4ee1bb",
+  "crm_kanban_and_reports": "8854defa3470e47b572e41744a45941ebdf59076a5ff8071fbfd7c18f348a253",
+  "standardize_accounting_party": "62b5b0e08e2720884f8583fa194e97387dee729b7a797e58c13132c82e0b4231",
+  "architecture_audit_crm_accounting": "e227cdb4255ddd1b97515675a7a74ca64a222ea7235240213303c575049b008b",
+  "google_oauth2_drive": "c290454c333960c3178eff354f80dd6baa78a443e28acf571323c19f22ca461c"
 }
