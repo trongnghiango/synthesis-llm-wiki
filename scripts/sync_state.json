@@ -37,5 +37,10 @@
   "accounting_module_research": "2abb0dce57acb0143c2d1039434d45387a8ba64b274b4a09ea78eb25aa5802cd",
   "architecture_audit_auditlog": "c333a2ceeb994294ea8447fd454c12ce2b9aec64df221d51e22f3f32fd097818",
   "implement_position_api": "7d94e8940ae05c551ed05fb2be980fb875fe1aba8dbfcf9e9990433fa494b882",
-  "professional_activity_feed_and_structured_metadata": "334c7d40b2b73b94514dc7c9445083863ab54a5d531e3a4daafc05e554b73f1b"
+  "professional_activity_feed_and_structured_metadata": "334c7d40b2b73b94514dc7c9445083863ab54a5d531e3a4daafc05e554b73f1b",
+  "stax_safe_update_pattern": "2994441d26bfdef684521b4811c6f43a1c1057a4e0838f97809d77462e8c2df9",
+  "service_catalog_fe": "7742a04b153f0f947c8b223fcb62074a85372c281afa08094fe2d99be2c9464c",
+  "constitution_hardening": "ff6373bae2f9bdce2b37c5a6db3cb7ec344789b2787bc8b08019511d0d67f255",
+  "manage_position_department_ui": "a5562c755b345110d95fa0abba8bb0150699e5fd0e722f796842f08fc554c7f5",
+  "ui_components_standardization": "40510781d90f398b0b370af4b65da87637282c05c07780264d0bb8127011a4af"
 }

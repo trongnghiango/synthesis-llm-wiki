@@ -1,39 +1,36 @@
+```yaml
 ---
 id: dom-manage-position-department-ui
-title: Giao diện Quản lý Định biên & Phân bổ Nhân sự
+title: UI Quản lý Vị trí và Bổ nhiệm Phòng ban
 layer: 3-atomic
 parent: "[[04_domain_knowledge]]"
 depends_on:
   - "[[hb-drizzle-base-repo]]"
-summary: "Thiết kế Kanban Staffing Board và chuẩn hóa API nghiệp vụ quản lý chức vụ, phân bổ nhân sự."
-tags: [hrm, staffing-board, org-structure, api-contract]
+  - "[[arch-als-tenant-isolation]]"
+  - "[[hb-delta-logging]]"
+summary: "Thiết kế giao diện Staffing Board dạng Kanban và chuẩn hóa API quản lý vị trí, bổ nhiệm nhân sự."
+tags: [hrm, staffing-board, org-structure, api-standardization, kanban-ui]
 ---
-
-## 1. API Contracts (`hrm.api.ts`)
-```typescript
-export interface Position {
-  id: string;
-  title: string;
-  departmentId: string;
-  maxSlots: number; // Định biên tối đa
-  filledSlots: number;
-}
-
-export interface AssignmentPayload {
-  employeeId: string;
-  positionId: string;
-  departmentId: string;
-  effectiveDate: string;
-}
-
-// Endpoints chuẩn hóa:
-// - GET/POST/PUT /api/v1/positions
-// - POST /api/v1/assignments (Phân bổ nhân sự mới)
 ```
 
-## 2. Thiết kế Luồng UI & Component
-- **Staffing Board (Kanban Mode):** Chế độ xem trực quan tích hợp trong `OrgStructurePage`.
-  - **Cột (Columns):** Chức vụ (`Position`) nhóm theo Phòng ban (`Department`), hiển thị chỉ số định biên (e.g., 2/5 Slots).
-  - **Thẻ (Cards):** Nhân sự (`Employee`). Cho phép Drag-and-Drop giữa các cột để kích hoạt `AssignmentModal`.
-- **PositionModal:** Khởi tạo/chỉnh sửa định biên chức vụ trực tiếp từ Sidebar cấu trúc tổ chức.
-- **AssignmentModal:** Form tái sử dụng để cấu hình chi tiết phân bổ (chức vụ, phòng ban, ngày hiệu lực).
+## 1. API Contract Chuẩn hóa (`hrm.api.ts`)
+```typescript
+// Quản lý Position (Chức vụ)
+export type PositionPayload = { name: string; code: string; departmentId: string; maxStaff: number };
+export const createPosition = (payload: PositionPayload): Promise<Position> => {};
+export const updatePosition = (id: string, payload: Partial<PositionPayload>): Promise<Position> => {};
+
+// Bổ nhiệm/Điều chuyển Nhân sự (Assignment)
+export type AssignPayload = { employeeId: string; positionId: string; departmentId: string; isPrimary: boolean };
+export const assignEmployee = (payload: AssignPayload): Promise<Assignment> => {};
+```
+
+## 2. Kiến trúc Thành phần UI (Staffing Board)
+*   **Staffing Board (Kanban View):** Tích hợp trực tiếp tại `OrgStructurePage`. Mỗi cột đại diện cho một `Position`. Hỗ trợ kéo thả (Drag-and-Drop) thẻ nhân viên giữa các vị trí để trigger API `assignEmployee`.
+*   **PositionModal:** Form tạo/sửa Position trực tiếp từ Sidebar cấu trúc tổ chức.
+*   **AssignmentModal:** Component độc lập, tái sử dụng để tìm kiếm nhanh nhân viên và gán vào vị trí nghiệp vụ kèm kiểm tra điều kiện ràng buộc `maxStaff`.
+
+## 3. Ràng buộc & Tích hợp Hệ thống
+*   **Tenant Isolation:** Mọi truy vấn phòng ban/vị trí phải đi qua middleware cô lập dữ liệu `[[arch-als-tenant-isolation]]`.
+*   **Audit Trail:** Mọi thao tác điều chuyển nhân sự phải được ghi nhận lịch sử thay đổi thông qua hệ thống `[[hb-delta-logging]]`.
+*   **State Management:** Đồng bộ danh sách nhân sự tại Board sau khi kết thúc kéo thả bằng cách refetch query key của `[[hb-drizzle-base-repo]]`.

@@ -1,37 +1,25 @@
-```yaml
 ---
 id: dom-crm-ui-standardization
-title: Chuẩn hóa UI CRM & Sửa lỗi Lead Repository
+title: Chuẩn hóa UI Component Module CRM & Sửa Lỗi Lead Intake
 layer: 3-atomic
 parent: "[[04_domain_knowledge]]"
 depends_on:
   - "[[hb-drizzle-base-repo]]"
-summary: "Chuẩn hóa UI Components (PageHeader, DataGrid) cho CRM và sửa lỗi Drizzle mapping trong Lead Repository."
-tags: [crm, ui-standardization, drizzle-orm, lead-repository, nestjs]
+summary: "Chuẩn hóa UI CRM qua PageHeader/DataGrid và tách biệt logic INSERT/UPDATE của Drizzle ORM để sửa lỗi lưu Lead."
+tags: [crm, ui-ux, refactor, drizzle, nestjs, bug-fix]
 ---
 
-## 1. Chuẩn Hóa UI Component (Module CRM)
-*   **`PageHeader`**: Bổ sung prop `backUrl: string`, `onBack: () => void`, và `titleBadge: ReactNode` hỗ trợ cho trang chi tiết (`LeadDetail`, `ContractDetail`).
-*   **`DataGrid`**: Thay thế bảng thủ công, tích hợp sẵn Pagination, Loading, Empty State và tối ưu responsive (cuộn ngang thông minh).
-*   **Hiệu ứng & Trải nghiệm**: Áp dụng Framer Motion cho chuyển trang admin mượt mà và tối ưu hóa loading state.
+### 1. Nâng cấp & Đồng bộ UI/UX (Frontend)
+- **`PageHeader`** (`/home/ka/temps/DentalCarePortal/client/src/components/common/PageHeader.tsx`):
+  - Bổ sung các props: `backUrl: string`, `onBack?: () => void`, và `titleBadge?: React.ReactNode` để tối ưu cho trang Detail.
+- **`DataGrid`**: Tích hợp sẵn Phân trang (Pagination), Trạng thái tải (Loading), Trạng thái trống (Empty State) và tự động cuộn ngang (Responsive).
+- **Phạm vi áp dụng**: 
+  - Refactor các trang danh sách và chi tiết tại `/home/ka/temps/DentalCarePortal/client/src/pages/admin/crm/` gồm: `clients.tsx`, `lead-detail.tsx`, và `contract-detail.tsx`.
+  - Tích hợp `framer-motion` cho hiệu ứng chuyển trang mượt mà trong phân hệ Admin.
 
-## 2. Thay Đổi Database Schema & Backend Repository
-*   **Schema Update** (`leads.schema.ts`): Thêm giá trị `'RELATIONSHIP'` vào `leadSourceEnum` để khớp với dữ liệu nghiệp vụ thực tế.
-*   **Repository Refactor** (`drizzle-lead.repository.ts`):
-    *   Refactor phương thức `LeadRepository.save`.
-    *   Tách biệt tường minh cơ chế `INSERT` và `UPDATE` thay vì dùng cơ chế save hỗn hợp, giải quyết triệt để lỗi mapping tham số SQL của Drizzle ORM.
-
-## 3. Khắc Phục Lỗi Lead Intake Form (Frontend)
-*   Sửa lỗi component Autocomplete bị mất focus khi thay đổi trạng thái nhập liệu.
-*   Khắc phục hiện tượng tràn khung hình (overflow layout) trên giao diện di động.
-
-## 4. Tệp tin tác động (Absolute Paths)
-*   **Frontend Components & Pages**:
-    *   `/home/ka/temps/DentalCarePortal/client/src/pages/admin/crm/clients.tsx`
-    *   `/home/ka/temps/DentalCarePortal/client/src/pages/admin/crm/lead-detail.tsx`
-    *   `/home/ka/temps/DentalCarePortal/client/src/pages/admin/crm/contract-detail.tsx`
-    *   `/home/ka/temps/DentalCarePortal/client/src/components/common/PageHeader.tsx`
-*   **Backend Core & Schema**:
-    *   `/home/ka/Repos/github.com/trongnghiango/rbac-nest-project/src/modules/crm/infrastructure/persistence/drizzle-lead.repository.ts`
-    *   `/home/ka/Repos/github.com/trongnghiango/rbac-nest-project/src/database/schema/crm/leads.schema.ts`
-```
+### 2. Khắc phục Logic Backend & Database Schema
+- **Database Schema** (`/home/ka/Repos/github.com/trongnghiango/rbac-nest-project/src/database/schema/crm/leads.schema.ts`):
+  - Bổ sung giá trị `'RELATIONSHIP'` vào `leadSourceEnum` để khớp với dữ liệu thực tế từ Client.
+- **Repository Pattern** (`/home/ka/Repos/github.com/trongnghiango/rbac-nest-project/src/modules/crm/infrastructure/persistence/drizzle-lead.repository.ts`):
+  - Tái cấu trúc hàm `LeadRepository.save()`. 
+  - Phân tách tường minh hành vi `INSERT` (khi không có ID/chưa tồn tại) và `UPDATE` thay vì dùng cơ chế tự động suy đoán để tránh lỗi mapping tham số truy vấn SQL của Drizzle ORM.
