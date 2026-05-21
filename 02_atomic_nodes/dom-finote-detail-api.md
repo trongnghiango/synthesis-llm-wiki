@@ -1,52 +1,45 @@
-```yaml
 ---
 id: dom-finote-detail-api
-title: Triển khai API Chi tiết Finote & Phân quyền Động
+title: API Chi Tiết Finote & Server-Driven UI
 layer: 3-atomic
 parent: "[[04_domain_knowledge]]"
 depends_on:
-  - "[[dom-accounting-finote]]"
-  - "[[arch-tenant-isolation]]"
-summary: "API chi tiết Finote hỗ trợ đa thuê sở (Tenancy) và cơ chế phân quyền động phục vụ Server-Driven UI."
-tags: [finote, accounting, api, tenancy, authorization, server-driven-ui]
+  - "[[hb-drizzle-base-repo]]"
+  - "[[arch-tenancy-isolation]]"
+summary: "API lấy chi tiết Finote tích hợp Tenancy Isolation và Metadata Actions hỗ trợ Server-Driven UI."
+tags: [accounting, finote, tenancy, server-driven-ui, api]
 ---
-```
 
-## 1. API Contract & Thiết kế Dữ liệu
+### 1. Luồng Nghiệp Vụ & Tenancy
+* **Data Access**: `DrizzleFinoteRepository.findByIdWithAttachments` sử dụng SQL Join để gom dữ liệu Finote và danh sách `attachments`.
+* **Tenancy Enforcement**: `FinoteService.getById` bắt buộc đối khớp `orgId` của Finote với `user.orgId`. Ném `EntityNotFoundException` nếu vi phạm để đảm bảo bảo mật.
+* **Role Check**: Truy cập `user.roles` trực tiếp tại root entity của User để phân quyền xử lý `_actions`.
 
-### Endpoint
-`GET /api/accounting/finotes/:id`
+### 2. Thiết Kế Server-Driven UI (SDUI)
+Để đồng nhất giao diện, API trả về metadata `_actions` định nghĩa trạng thái của các nút bấm dựa trên vai trò (Manager/Staff):
+* **DTO Mở Rộng (`ActionDetailDto`)**:
+  ```typescript
+  type ActionDetailDto = {
+    allowed: boolean;
+    label: string;
+    color: string;
+    reason?: string;
+  }
+  ```
+* **Quy tắc Frontend**:
+  * `allowed === true`: Hiển thị nút với `label` và `color` từ backend.
+  * `allowed === false`: Disable nút và hiển thị tooltips giải thích bằng `reason`.
 
-### Cấu trúc Schema Response nâng cao (`FinoteResponseDto`)
-Hỗ trợ cơ chế **Server-Driven UI** qua metadata `_actions`:
-```typescript
-interface ActionDetailDto {
-  allowed: boolean;
-  label?: string;   // Label hiển thị trên nút
-  color?: string;   // Mã màu hiển thị (e.g. primary, danger)
-  reason?: string;  // Lý do bị disable (nếu allowed = false)
-}
-
-interface FinoteResponseDto {
-  id: string;
-  orgId: string;
-  attachments: Attachment[];
-  _actions: Record<string, ActionDetailDto>; // Quyền: Approve, Edit, View...
-}
-```
-
-## 2. Kiến trúc Xử lý & Luồng Nghiệp vụ
-
-### Tầng Dữ liệu (Repository)
-* `DrizzleFinoteRepository.findByIdWithAttachments`: Sử dụng SQL Query tối ưu để nạp kèm quan hệ 1-N `attachments` trong cùng một phiên truy vấn thay vì lazy load.
-
-### Tầng Nghiệp vụ (Service & Security)
-1. **Tenancy Enforcement**: `FinoteService.getById` bắt buộc đối chiếu chéo `OrgId` của User đang đăng nhập với `OrgId` của bản ghi Finote. Trả về `EntityNotFoundException` nếu không khớp để ngăn chặn việc dò quét dữ liệu chéo (ID harvesting).
-2. **Quyết định Quyền hạn (RBAC)**:
-   * **Manager**: Được cấp quyền `Approve`, `Edit`, `View`.
-   * **Staff**: Chỉ được cấp quyền `View`, `Edit`. Quyền `Approve` set `allowed: false` kèm `reason` cụ thể.
-   * *Lưu ý sửa lỗi*: Truy cập trực tiếp qua `user.roles` tại Controller (thay thế cho `user.profileContext.roles` cũ).
-
-## 3. Hướng dẫn Tích hợp Frontend
-* Kiểm tra `_actions[actionName].allowed` để ẩn/hiện hoặc disable nút bấm.
-* Sử dụng trực tiếp `label` và `color` từ API trả về để đồng bộ giao diện mà không cần hardcode logic phân quyền ở client.
+### 3. API Contract
+* **Endpoint**: `GET /api/accounting/finotes/:id`
+* **Response Highlight (`FinoteResponseDto`)**:
+  ```json
+  {
+    "id": "string",
+    "attachments": [],
+    "_actions": {
+      "approve": { "allowed": false, "label": "Duyệt", "color": "green", "reason": "Chỉ dành cho Manager" },
+      "edit": { "allowed": true, "label": "Sửa", "color": "blue" }
+    }
+  }
+  ```

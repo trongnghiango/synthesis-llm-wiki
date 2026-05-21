@@ -1,28 +1,37 @@
 ---
 id: dom-attachment-management
-title: Tích hợp Frontend Hệ thống Quản lý Tài liệu đính kèm (Attachments)
+title: Tích hợp Frontend Quản lý Tài liệu đính kèm
 layer: 3-atomic
 parent: "[[04_domain_knowledge]]"
-depends_on: []
-summary: "Tích hợp React Query Hooks và Component AttachmentBoard polymorph để quản lý tài liệu đính kèm của Client, Contract, Lead."
-tags: [frontend, react-query, attachment, drag-drop, polymorphic]
+depends_on:
+  - "[[dom-polymorphic-attachments]]"
+summary: "Tích hợp UI Component AttachmentBoard đa hình, React Query Hooks và quản lý tài liệu trên Client, Contract, Lead."
+tags: [frontend, attachment, react-query, polymorphic, uploader]
 ---
 
-### 1. API & React Query Hooks
-- **API (`/home/ka/Repos/github.com/trongnghiango/STAX_ASP/frontend/client/src/modules/system/api/system.api.ts`)**: 
-  - Bổ sung `getAttachments`, `uploadAttachment` (Polymorphic), và `deleteAttachment`.
+### 1. API & Hooks Client
+- **API (`/home/ka/Repos/github.com/trongnghiango/STAX_ASP/frontend/client/src/modules/system/api/system.api.ts`)**:
+  - `getAttachments(entityType, entityId)`
+  - `uploadAttachment(entityType, entityId, file)` (Polymorphic API)
+  - `deleteAttachment(id)`
 - **Hooks (`/home/ka/Repos/github.com/trongnghiango/STAX_ASP/frontend/client/src/modules/system/hooks/useAttachments.ts`)**:
-  - `useAttachments`, `useUploadAttachment`, `useDeleteAttachment`: Quản lý state/cache qua React Query, tự động invalidation và trigger Toast.
+  - `useAttachments`, `useUploadAttachment`, `useDeleteAttachment` (React Query).
+  - Tự động invalidate cache khi upload/delete thành công.
 
-### 2. UI Component & Tích hợp Trang
-- **Shared Component (`/home/ka/Repos/github.com/trongnghiango/STAX_ASP/frontend/client/src/components/common/AttachmentBoard.tsx`)**:
-  - Hỗ trợ Drag & Drop (bo viền dashed hover), hiển thị Progress Bar (Google Drive upload), phân loại tag, phân biệt icon theo định dạng.
-  - Phân quyền xóa: chỉ cho phép khi `uploadedById === currentUser.id` hoặc user là `ADMIN`.
-- **Tích hợp CRM Pages**:
-  - **Client (`/home/ka/Repos/github.com/trongnghiango/STAX_ASP/frontend/client/src/pages/admin/crm/client-detail.tsx`)**: Render `<AttachmentBoard entityType="client" />` tại tab "Tài liệu".
-  - **Contract (`/home/ka/Repos/github.com/trongnghiango/STAX_ASP/frontend/client/src/pages/admin/crm/contract-detail.tsx`)**: Thay tab "Xem File PDF" bằng `<AttachmentBoard entityType="contract" />`.
-  - **Lead (`/home/ka/Repos/github.com/trongnghiango/STAX_ASP/frontend/client/src/pages/admin/crm/lead-detail.tsx`)**: Nâng cấp lên 4 tabs, thêm tab "Tài liệu" render `<AttachmentBoard entityType="lead" />`.
+### 2. Component Chung: `AttachmentBoard`
+- **Đường dẫn**: `/home/ka/Repos/github.com/trongnghiango/STAX_ASP/frontend/client/src/components/common/AttachmentBoard.tsx`
+- **Tính năng & Nghiệp vụ**:
+  - Drag & Drop UI (Bo viền dashed, transition mượt mà).
+  - Tích hợp thanh tiến trình (Progress bar) đồng bộ tải tệp lên Google Drive.
+  - Phân quyền xóa: `uploadedById === currentUser.id` hoặc người dùng có vai trò `ADMIN`.
+  - Phân loại tài liệu theo danh mục và gán tags động.
 
-### 3. Tiêu chuẩn Kỹ thuật & UX
-- **TypeScript**: Biên dịch thành công 100% (`npm run check` trả về Code 0).
-- **UX/Responsive**: Tự động co giãn (Flexbox wrap), giới hạn file upload tối đa 20MB kèm whitelist định dạng, hiển thị toast phản hồi trạng thái chi tiết.
+### 3. Tích hợp Trang (CRM Pages)
+Nhúng `<AttachmentBoard entityType="..." entityId="..." />` vào các luồng nghiệp vụ:
+- **Client Detail** (`/home/ka/Repos/github.com/trongnghiango/STAX_ASP/frontend/client/src/pages/admin/crm/client-detail.tsx`): Thay thế tab "Tài liệu" cũ.
+- **Contract Detail** (`/home/ka/Repos/github.com/trongnghiango/STAX_ASP/frontend/client/src/pages/admin/crm/contract-detail.tsx`): Thay thế tab "Xem File PDF".
+- **Lead Detail** (`/home/ka/Repos/github.com/trongnghiango/STAX_ASP/frontend/client/src/pages/admin/crm/lead-detail.tsx`): Nâng cấp lên layout 4 tabs, thêm tab "Tài liệu".
+
+### 4. Chất lượng kỹ thuật (Quality Checklist)
+- **TypeScript**: `npm run check` (thực thi `tsc`) đạt **Code 0** (không lỗi Type/Import).
+- **UX & RWD**: Hỗ trợ Flexbox tự động co giãn trên Mobile, kiểm soát upload tệp tin tối đa 20MB theo whitelist, Toast cảnh báo trực quan.

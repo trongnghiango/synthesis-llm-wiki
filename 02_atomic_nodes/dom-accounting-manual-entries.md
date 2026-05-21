@@ -1,29 +1,26 @@
 ---
 id: dom-accounting-manual-entries
-title: Luồng nghiệp vụ lập phiếu thu chi và bút toán thủ công
+title: Tích hợp Lập Phiếu Thu/Chi & Bút Toán Thủ Công
 layer: 3-atomic
 parent: "[[04_domain_knowledge]]"
 depends_on:
   - "[[dom-accounting-finote]]"
-summary: "Tích hợp giao diện và DTO Backend cho luồng lập phiếu thu/chi thủ công (Finote) và định khoản bút toán tay (Journal Entry)."
-tags: [accounting, finote, journal-entry, dto, frontend]
+summary: "Triển khai UI lập phiếu thu/chi, định khoản thủ công và cập nhật DTO Backend (partyName, FinoteCategory)"
+tags: [accounting, manual-entry, dto, frontend, backend]
 ---
 
-## 1. Luồng Nghiệp vụ Cốt lõi (Core Business Flows)
-* **Luồng 1 (Phiếu thủ công):** Lập phiếu thu/chi -> Phê duyệt -> Sổ Quỹ -> Tự động sinh bút toán Nhật ký chung. Chi tiết thực thể xem tại `[[dom-accounting-finote]]`.
-* **Luồng 2 (Bút toán thủ công):** Định khoản tay trực tiếp trên giao diện Nhật ký chung.
+## 1. Thay đổi Codebase (Absolute Paths)
+*   `/home/ka/Repos/github.com/trongnghiango/STAX_ASP/backend/src/modules/accounting/application/dtos/create-finote.dto.ts` & `/home/ka/Repos/github.com/trongnghiango/STAX_ASP/backend/src/modules/accounting/infrastructure/dtos/create-finote.request.dto.ts`:
+    *   Bổ sung trường `partyName?: string` vào DTO nhận diện tên đối tác/khách hàng đối với phiếu thủ công.
+    *   Chuẩn hóa default `category` của Client sang `"OTHER"` để tương thích chính xác với enum `FinoteCategory` của Backend.
+*   `/home/ka/Repos/github.com/trongnghiango/STAX_ASP/frontend/client/src/pages/admin/accounting/components/create-finote-dialog.tsx`: Component Dialog UI Bento gradient, tự động thay đổi màu sắc chủ đạo theo loại Phiếu Thu hoặc Phiếu Chi.
+*   `/home/ka/Repos/github.com/trongnghiango/STAX_ASP/frontend/client/src/pages/admin/accounting/finotes.tsx`: Thay thế hoàn toàn các nút tĩnh (dead buttons) bằng trigger gọi `CreateFinoteDialog`.
+*   `/home/ka/Repos/github.com/trongnghiango/STAX_ASP/frontend/client/src/pages/admin/accounting/journal-entries.tsx`: Tích hợp `JournalEntryForm` vào Dialog lớn của nút "Thêm Bút toán mới", tự động refetch bảng dữ liệu sau khi mutation thành công.
 
-## 2. API Contract & Thay đổi Backend
-Tệp tin sửa đổi:
-* `/home/ka/Repos/github.com/trongnghiango/STAX_ASP/backend/src/modules/accounting/application/dtos/create-finote.dto.ts`
-* `/home/ka/Repos/github.com/trongnghiango/STAX_ASP/backend/src/modules/accounting/infrastructure/dtos/create-finote.request.dto.ts`
+## 2. Luồng Nghiệp vụ Nghiệm thu
+*   **Luồng 1 (Gián tiếp qua Sổ quỹ)**: Tạo phiếu thu/chi thủ công $\rightarrow$ Phê duyệt $\rightarrow$ Ghi nhận Sổ quỹ $\rightarrow$ Tự động sinh bút toán Nhật ký chung (Journal Entries).
+*   **Luồng 2 (Trực tiếp)**: Định khoản thủ công trực tiếp bằng tay thông qua giao diện Nhật ký chung.
 
-**Thay đổi chính:**
-* Bổ sung trường `partyName` (string, optional) vào DTO để class-validator cho phép nhận thông tin tên đối tác/khách hàng đối với phiếu thu/chi thủ công.
-* Đồng bộ mặc định trường `category` từ client gửi lên thành `"OTHER"` để khớp chính xác với Enum `FinoteCategory` ở Backend.
-
-## 3. Cấu trúc Giao diện & Tương tác Frontend
-Tệp tin sửa đổi/tạo mới:
-* `create-finote-dialog.tsx`: Component Dialog Bento UI hỗ trợ đổi màu linh hoạt theo Loại phiếu (Thu/Chi).
-* `finotes.tsx`: Loại bỏ các nút cũ, tích hợp `CreateFinoteDialog` để kích hoạt luồng tạo phiếu thu/chi thực tế.
-* `journal-entries.tsx`: Kết nối nút bấm `"Thêm Bút toán mới"` với Dialog chứa `JournalEntryForm`, tích hợp mutation tạo bút toán thủ công và tự động refetch bảng dữ liệu sau khi thành công.
+## 3. Liên kết Hệ thống
+*   Nghiệp vụ Quản lý Phiếu: `[[dom-accounting-finote]]`
+*   Hệ thống Định khoản Nhật ký: `[[dom-accounting-journal]]`

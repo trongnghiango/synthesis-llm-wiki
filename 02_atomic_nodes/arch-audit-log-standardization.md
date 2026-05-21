@@ -1,31 +1,25 @@
-```yaml
 ---
 id: arch-audit-log-standardization
-title: Chuẩn Hóa Audit Log, Naming & Activity Feed
+title: Chuẩn hóa Audit Log, CamelCase và Activity Feed
 layer: 3-atomic
 parent: "[[01_core_architecture]]"
 depends_on:
   - "[[hb-drizzle-base-repo]]"
   - "[[hb-delta-logging]]"
-  - "[[arch-als-tenant-isolation]]"
-summary: "Chuẩn hóa ánh xạ snake_case sang camelCase, thực thi DrizzleAuditLogService qua port, và hợp nhất dữ liệu Omnichannel Activity Feed."
-tags: [audit-log, naming-standardization, activity-feed, drizzle, onboarding]
+summary: "Hoàn thiện hạ tầng DrizzleAuditLogService, chuẩn hóa camelCase toàn hệ thống và triển khai Omnichannel Activity Feed."
+tags: [audit-log, refactoring, activity-feed, drizzle, camel-case]
 ---
 
-### 1. Hệ Thống Audit Log & Chuẩn Hóa Naming
-* **Audit Log Architecture**: 
-  * Triển khai `DrizzleAuditLogService` bất đồng bộ (fire-and-forget) dựa trên interface `AUDIT_LOG_PORT`.
-  * Áp dụng thành công cho 4 sự kiện cốt lõi: Lead Won, Payment Allocated, Role Assigned, và User Provisioned. Chi tiết kỹ thuật ghi log xem tại `[[hb-delta-logging]]`.
-* **Database Mapping (Snake to Camel)**:
-  * Áp dụng cơ chế map cấu trúc `snake_case` dưới Database thành `camelCase` trên tầng TypeScript/Drizzle Schema (tham chiếu `[[hb-drizzle-base-repo]]`).
-  * Loại bỏ triệt để rò rỉ cú pháp `snake_case` tại Controllers, DTOs, Mappers và hệ thống Unit Test.
+### 1. Hạ tầng Audit Log (Nhật ký hành động)
+*   **Cơ chế:** `DrizzleAuditLogService` thực thi `AUDIT_LOG_PORT` dạng fire-and-forget.
+*   **Bảng DB:** `audit_logs` (được lập chỉ mục đầy đủ).
+*   **Tích hợp nghiệp vụ:** Tự động hóa ghi log cho các sự kiện lõi: Lead Won, Payment Allocated, Role Assigned, và User Provisioned (tham chiếu cấu trúc tại `[[hb-delta-logging]]`).
 
-### 2. Omnichannel Activity Feed & Onboarding Automation
-* **Cấu trúc Dữ liệu Timeline**:
-  * Bảng `interaction_notes`: Lưu trữ các hoạt động thủ công (ghi chú cuộc gọi, biên bản họp).
-  * Bảng `audit_logs`: Lưu trữ các sự kiện hệ thống tự động.
-* **Hợp nhất dòng thời gian (Timeline)**:
-  * Triển khai `ActivityFeedService` chịu trách nhiệm gộp và sắp xếp dữ liệu từ hai nguồn trên.
-  * API Contract: `GET /organizations/:orgId/timeline` - Phục vụ hiển thị dòng thời gian hội tụ của Tổ chức.
-* **Onboarding Tự động**: Kích hoạt chuỗi hành động (gửi thông báo, khởi tạo cấu hình mặc định) khi một tổ chức/Tenant được kích hoạt thành công (tuân thủ nguyên tắc cách ly dữ liệu tại `[[arch-als-tenant-isolation]]`).
-```
+### 2. Chuẩn hóa Naming Convention (DB to TS)
+*   **Quy tắc:** Ánh xạ tự động trong Drizzle Schemas từ `snake_case` (Database) sang `camelCase` (TypeScript) qua `[[hb-drizzle-base-repo]]`.
+*   **Phạm vi refactor:** Loại bỏ hoàn toàn rò rỉ `snake_case` tại Controllers, DTOs, Mappers và hệ thống Unit Tests (đạt 0 lỗi TypeScript compile).
+
+### 3. Kiến trúc Omnichannel Activity Feed & Onboarding
+*   **Hội tụ dữ liệu:** `ActivityFeedService` gộp dữ liệu từ 2 nguồn: log hệ thống (`audit_logs`) và ghi chú tương tác thủ công (`interaction_notes`).
+*   **API Contract:** `GET /organizations/:orgId/timeline` - Trả về dòng thời gian hội tụ của tổ chức.
+*   **Tự động hóa Onboarding:** Kích hoạt luồng gửi thông báo và thiết lập dữ liệu ban đầu ngay khi tài khoản khách hàng mới được active.

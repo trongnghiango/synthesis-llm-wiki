@@ -1,29 +1,27 @@
 ---
-id: hb-integration-testing-stabilization
-title: "Chuẩn hóa Kiến trúc Dịch vụ và Hạ tầng Integration Test với PGLite"
+id: "hb-integration-testing-stabilization"
+title: "Chuẩn hóa Kiến trúc và Tích hợp Cơ sở dữ liệu thử nghiệm PGLite"
 layer: 3-atomic
 parent: "[[03_technical_handbooks]]"
 depends_on:
   - "[[hb-drizzle-base-repo]]"
-summary: "Tách biệt Application Layer khỏi HTTP Framework và chuyển đổi công nghệ database testing từ pg-mem sang PGLite hỗ trợ Drizzle ORM."
-tags: [testing, pglite, drizzle-orm, architectural-hardening, domain-exceptions]
+summary: "Loại bỏ triệt để NestJS Framework Leak khỏi Application Layer và chuyển đổi giải pháp in-memory DB từ pg-mem sang PGLite để tương thích hoàn toàn với Drizzle ORM."
+tags: [testing, architecture-hardening, pglite, drizzle-orm, domain-exceptions]
 ---
 
-### 1. Thắt chặt Kiến trúc (Architectural Hardening)
-- **Framework Agnostic:** Loại bỏ hoàn toàn NestJS exceptions khỏi Application Layer.
-  - Thay `NotFoundException` $\rightarrow$ `EntityNotFoundException`.
-  - Thay `BadRequestException` / `ForbiddenException` $\rightarrow$ `BusinessRuleValidationException` hoặc `UnauthorizedException`.
-  - Toàn bộ exception kế thừa từ `@core/shared/domain/exceptions/base.exceptions`.
-- **Unit/Service Test Rules:**
-  - Mock Repository qua Interface (Port), tuyệt đối không mock triển khai Drizzle cụ thể.
-  - Mock `save` phải trả về chính entity instance (không dùng spread object để tránh mất getters).
+## 1. Khử Framework Leak & Chuẩn hóa Domain Exception
+* **Loại bỏ NestJS HTTP Exceptions:** Loại bỏ hoàn toàn `@nestjs/common` imports tại Application Layer (Service layer). 
+* **Ánh xạ Exception thống nhất:**
+  * `NotFoundException` $\rightarrow$ `EntityNotFoundException`
+  * `BadRequestException` / `ForbiddenException` $\rightarrow$ `BusinessRuleValidationException` hoặc `UnauthorizedException`
+* **Áp dụng nhất quán trên các Service:** `AuthService`, `UserService`, `LeadQueryService`, `QuoteService`, `FinoteService` (`[[dom-accounting-finote]]`).
 
-### 2. Hạ tầng Integration Test: Chuyển đổi sang `PGLite`
-- **Vấn đề của `pg-mem`:**
-  1. Không hỗ trợ cấu hình type parser của `pg`.
-  2. Không hỗ trợ `rowMode: 'array'` cho Prepared Statements của Drizzle.
-  3. Lỗi cú pháp với truy vấn quan hệ phức tạp sinh ra `LEFT JOIN LATERAL` (`db.query.findFirst`).
-- **Giải pháp PGLite (`@electric-sql/pglite`):**
-  - Chạy engine PostgreSQL biên dịch sang WebAssembly (WASM) in-memory, đảm bảo tương thích 100% SQL chuẩn của Drizzle.
-  - Cấu hình Jest chạy với tag `--experimental-vm-modules` để nạp dynamic WASM.
-  - Đồng bộ Schema Helper: Cập nhật bảng `contacts` trong `test-db.helper.ts` (thêm `userId`, `address`, `jobTitle`, `isPrimary`) để khớp hoàn toàn với Production.
+## 2. Di chuyển từ pg-mem sang PGLite
+* **Hạn chế của pg-mem:** Lỗi cấu hình `getTypeParser`, không hỗ trợ `rowMode: 'array'` cho Prepared Statements, và lỗi scoping phân tích câu lệnh `LEFT JOIN LATERAL` của Drizzle ORM.
+* **Giải pháp PGLite:** Thay thế bằng `@electric-sql/pglite` (Engine Postgres thực thi qua WebAssembly) chạy in-memory cho môi trường Jest.
+* **Cấu hình:** Bổ sung `--experimental-vm-modules` vào cấu hình khởi chạy Jest để kích hoạt nạp động WASM của PGLite. Đảm bảo tương thích 100% với Drizzle Repositories (`[[hb-drizzle-base-repo]]`).
+
+## 3. Khắc phục lỗi nghiệp vụ & Đồng bộ Schema
+* **State Machine & Value Objects:** Thay thế trạng thái `LeadStage.OPEN` không tồn tại bằng `LeadStage.NEW`. Ràng buộc các tham số bắt buộc (`title`, `deadlineAt`) khi khởi tạo `Finote`.
+* **Mocking Rule:** Cấm trả về spread object khi mock `save` của Repository để tránh làm mất các getters của Entity; bắt buộc trả về chính instance.
+* **Đồng bộ Test Schema:** Cập nhật helper khởi tạo DB test (`test-db.helper.ts`), bổ sung các trường thiếu cho bảng `contacts` (`userId`, `address`, `jobTitle`, `isPrimary`) khớp với cấu hình production.

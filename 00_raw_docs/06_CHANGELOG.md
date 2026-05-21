@@ -2,7 +2,19 @@
 
 Lưu trữ lịch sử các thay đổi nhỏ, sửa lỗi, và micro-features trong hệ thống STAX.
 
+### [2026-05-21] - Chuyển Google Drive Storage từ Service Account sang OAuth 2.0
+
+- **Module:** `system`
+- **Thay đổi:**
+  - Thêm mới `google-oauth.service.ts`: Xử lý OAuth 2.0 Authorization Code Flow và tự động refresh `access_token` bằng `refresh_token` lưu trong `.env`.
+  - Rewrite `google-drive.service.ts`: Loại bỏ hoàn toàn dependency `googleapis` SDK, thay bằng Google Drive REST API v3 gọi qua `fetch()` + `GoogleOAuthService`. `IFileStoragePort` interface giữ nguyên → `AttachmentService` không bị ảnh hưởng.
+  - Thêm mới `google-drive.controller.ts`: 2 endpoint setup 1-time (`GET /api/google/authorize` cần quyền `system:admin`, `GET /api/google/callback` là `@Public()`).
+  - Cập nhật `google-drive.config.ts`: Thay `serviceAccountJsonPath` bằng các OAuth2 fields (`clientId`, `clientSecret`, `redirectUri`, `refreshToken`).
+  - Cập nhật `system.module.ts`: Đăng ký `GoogleOAuthService` provider và `GoogleDriveController`.
+  - Cập nhật `.env.development`: Thay section Service Account bằng section OAuth 2.0 với hướng dẫn lấy `refresh_token`.
+
 ### [2026-05-20] - Sửa lỗi pgEnum Mismatch khi Cập nhật Trạng thái Lead
+
 
 - **Module:** `crm`
 - **Thay đổi:**

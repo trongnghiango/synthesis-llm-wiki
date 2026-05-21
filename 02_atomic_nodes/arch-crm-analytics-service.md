@@ -2,25 +2,39 @@
 id: arch-crm-analytics-service
 title: Thiết kế CrmAnalyticsService
 layer: 3-atomic
-parent: "[[04_domain_knowledge]]"
+parent: "[[01_core_architecture]]"
 depends_on:
   - "[[hb-drizzle-base-repo]]"
-summary: "Kiến trúc CrmAnalyticsService tối ưu truy vấn CTE qua Drizzle ORM phục vụ dashboard pipeline, doanh thu YoY và cảnh báo."
-tags: [crm, analytics, drizzle-orm, pipeline, revenue]
+summary: "Thiết kế CrmAnalyticsService cung cấp API phân tích pipeline, doanh thu YoY và cảnh báo vận hành sử dụng Drizzle CTE."
+tags: [crm, analytics, drizzle, nestjs, architecture]
 ---
 
-### 1. Database & Infrastructure
-- **Bảng đích**: `leads` (`status`, `source`, `acquired_at`), `contracts` (`type`, `value`, `status`), `quotes` (`status`, `sent_at`).
-- **Indexes sử dụng**: `idx_leads_acquired_at` (time-series), `idx_leads_status` (funnel), `idx_contracts_tenant_status` (revenue).
-- **Pattern**: Tạo service pure read-model `backend/src/modules/crm/application/services/crm-analytics.service.ts`. Inject trực tiếp `@Inject(DRIZZLE)`, viết truy vấn SQL CTE tối ưu bằng template literal `sql` của Drizzle. Không dùng entity domain, không transaction, không phát event.
+## 1. Database & Domain Context
+- **Read-only service**: Không có entity mới, không write/transaction, không domain event.
+- **Bảng truy vấn**: `leads`, `contracts`, `quotes` (sử dụng index sẵn có: `idx_leads_acquired_at`, `idx_leads_status`, `idx_contracts_tenant_status`).
 
-### 2. API Contracts & Controller
-Tích hợp vào `backend/src/modules/crm/presentation/dashboard.controller.ts` (Giữ các endpoints cũ để tương thích ngược):
-- `GET /dashboard/pipeline` | Quyền: `lead:read` | Output: `PipelineResponseDto` (Funnel stages, conversion rate, conversion source, avgDaysToClose).
-- `GET /dashboard/revenue` | Quyền: `lead:read` | Output: `RevenueResponseDto` (Doanh thu tháng: MRR, One-off, Leads Won và so sánh YoY cùng kỳ năm trước).
-- `GET /dashboard/alerts` | Quyền: `lead:read` | Output: `AlertsResponseDto` (Cảnh báo: coldLeads >7 ngày, stalledQuotes >14 ngày, expiringContracts <30 ngày, unassignedLeads, revenueConcentration top 5 >60%).
-- **Frontend Contract**: Định nghĩa interface tại `frontend/shared/contracts/crm.ts` (Không cần schema Zod validation).
+## 2. Infrastructure & Application Layer
+- **File tạo mới**: `backend/src/modules/crm/application/services/crm-analytics.service.ts`
+- **Pattern**: Inject `DRIZZLE` (`NodePgDatabase<typeof schema>`), sử dụng Drizzle `sql` literal viết CTE tối ưu hóa round-trip (1 CTE/method).
 
-### 3. Module Wiring
-- **CrmModule**: Khai báo `CrmAnalyticsService` trong `providers` (chỉ dùng nội bộ, không export).
-- **DashboardController**: Inject trực tiếp `CrmAnalyticsService` vào constructor bên cạnh `DashboardService`.
+### API Endpoints (`dashboard.controller.ts`)
+Yêu cầu guard `@Permissions('lead:read')`:
+- `GET /dashboard/pipeline` -> `PipelineResponseDto` (Funnel & Conversion rate).
+- `GET /dashboard/revenue` -> `RevenueResponseDto` (MRR vs One-off, so sánh YoY).
+- `GET /dashboard/alerts` -> `AlertsResponseDto` (Cảnh báo vận hành & rủi ro tập trung doanh thu).
+
+### DTOs Structure (Tóm tắt)
+- `PipelineResponseDto`: `stages` (stage, count, conversionRate, avgDaysInStage), `sources` (won/total, rate), `avgDaysToClose`.
+- `RevenueResponseDto`: `monthly` (month, mrr, oneOff, leadsWon, previousYear).
+- `AlertsResponseDto`: `coldLeads` (>7 ngày), `stalledQuotes` (>14 ngày), `expiringContracts` (<30 ngày), `unassignedLeads`, `revenueConcentration` (top 5 clients >60% doanh thu).
+
+## 3. Module Wiring
+- **CrmModule**: Khai báo `CrmAnalyticsService` trong `providers` (không export).
+- **DashboardController**: Inject trực tiếp qua constructor:
+  ```typescript
+  constructor(
+    private readonly dashboardService: DashboardService,
+    private readonly analyticsService: CrmAnalyticsService
+  ) {}
+  ```
+- **Deprecation**: Giữ nguyên `/charts/revenue` và `/insights` để đảm bảo tương thích ngược.

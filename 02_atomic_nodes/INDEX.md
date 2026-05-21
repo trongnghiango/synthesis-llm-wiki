@@ -8,6 +8,8 @@ Chào mừng bạn đến với Layer 3 - Hệ thống **Nốt nguyên tử (Ato
 
 | Nốt Nguyên Tử | Tóm tắt (1 dòng) | Phụ thuộc | Tags |
 | :--- | :--- | :--- | :--- |
+| [[dom-domain-hardening]] | Đóng gói trạng thái thực thể Finote, loại bỏ magic strings và sửa lỗi vi phạm Clean Architecture. | *Tự động* | `#domain-driven-design ` #encapsulation ` #refactoring ` #security ` #clean-architecture` |
+| [[arch-professional-api-integration]] | Tái cấu trúc System Module với Service Layer, chuẩn Backend-Driven UI (_actions) và bổ sung API điều phối/báo cáo. | *Tự động* | `#system-module ` #backend-driven-ui ` #action-dto ` #api-contract` |
 | [[arch-architecture_blueprint_v1_rollout]] | Thiết lập nền tảng Modular Monolith và thực hiện Phase 0 & Phase 1 Client Modularization cho dự án STAX. | *Tự động* | `#architecture ` #modular-monolith ` #client-refactor ` #api-modularization ` #bff` |
 | [[arch-constitution-hardening]] | Chuẩn hóa kiến trúc STAX thông qua Event-Driven Auditing, dynamic Bootstrap permissions và thuần hóa Domain Exceptions. | *Tự động* | `#architecture ` #auditing ` #event-driven ` #security ` #domain-purity` |
 | [[arch-architecture_v1_adoption]] | Quy hoạch RBAC sang chuẩn domain:action, cấu trúc lại API Bootstrap permissions.raw/flags và xác lập Backend làm Domain Service. | *Tự động* | `#architecture ` #rbac ` #bootstrap-service ` #migration` |
@@ -60,6 +62,11 @@ Chào mừng bạn đến với Layer 3 - Hệ thống **Nốt nguyên tử (Ato
 
 | Nốt Nguyên Tử | Tóm tắt (1 dòng) | Phụ thuộc | Tags |
 | :--- | :--- | :--- | :--- |
+| [[dom-stax-implementation-roadmap]] | Lộ trình triển khai STAX 22 tuần (11 Sprints) kèm đặc tả kiến trúc kỹ thuật lõi. | *Tự động* | `#roadmap ` #agile ` #architecture-design ` #db-schema` |
+| [[dom-crm-lead-normalization]] | Chuẩn hóa thực thể Lead bằng cách liên kết Contact qua contact_id và di trú thành công 1172 records kế thừa. | *Tự động* | `#crm ` #database-normalization ` #drizzle ` #lead-migration` |
+| [[dom-hrm-employee-update]] | Định nghĩa API PATCH /api/hrm/employees/:id tích hợp ràng buộc multi-tenancy và kiểm tra chéo vị trí nhân sự. | *Tự động* | `#hrm ` #employee ` #api ` #validation ` #multi-tenancy` |
+| [[dom-implement_position_crud]] | Chi tiết kỹ thuật triển khai nghiệp vụ CRUD Vị trí (Positions) tích hợp kiểm tra ràng buộc nhân sự và Drizzle ORM. | *Tự động* | `#positions ` #crud ` #drizzle ` #org-structure` |
+| [[dom-org_structure_recursion_strategy]] | Giải pháp truy vấn gộp nhân sự/vị trí cho các đơn vị trực thuộc bằng cơ chế so khớp chuỗi đường dẫn (LIKE path%) tối ưu hiệu năng. | *Tự động* | `#org-structure ` #recursion ` #drizzle-orm ` #hrm-api` |
 | [[dom-accounting-cash-book]] | Đặc tả nghiệp vụ chống âm quỹ, cơ chế chuyển khoản nội bộ nguyên tử và tích hợp thanh toán hóa đơn với Sổ Quỹ. | *Tự động* | `#cash-book ` #accounting ` #transaction-propagation ` #domain-entity ` #drizzle-orm` |
 | [[dom-cash-transfer-sync]] | Cơ chế đồng bộ hóa bất đồng bộ thông qua Domain Event khi chuyển tiền nội bộ, tự động sinh bút toán nháp kép. | *Tự động* | `#accounting ` #event-driven ` #money-transfer ` #journal-entry` |
 | [[arch-crm-accounting-audit-20260509]] | Giải quyết trùng lặp thực thể CRM, áp dụng cô lập Tenant cho Accounting và chuẩn hóa Attachment. | *Tự động* | `#crm ` #accounting ` #tenant-isolation ` #identity ` #refactoring` |
