@@ -1,3 +1,4 @@
+#!/usr/bin/env script
 #!/usr/bin/env python3
 import os
 import re
@@ -7,6 +8,7 @@ import shutil
 import urllib.request
 import urllib.error
 import time
+import hashlib
 from datetime import datetime
 
 # Path Config
@@ -15,6 +17,7 @@ VAULT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RAW_DOCS_DIR = os.path.join(VAULT_ROOT, "00_raw_docs")
 ATOMIC_NODES_DIR = os.path.join(VAULT_ROOT, "02_atomic_nodes")
 NEURAL_MAP_DIR = os.path.join(VAULT_ROOT, "03_neural_map")
+STATE_FILE = os.path.join(VAULT_ROOT, "scripts", "sync_state.json")
 
 # API Settings
 DEFAULT_BASE_URL = "https://api.anthropic.com"
@@ -131,34 +134,81 @@ def copy_raw_docs():
     print(f"Đã sao chép/cập nhật {copied_count} tệp tin thô sang {RAW_DOCS_DIR}.")
     return True
 
+def calculate_folder_hash(folder_path):
+    """
+    Calculates a SHA-256 hash representing the contents of all markdown files in the folder.
+    This serves as a fingerprint to detect any updates to the files.
+    """
+    if not os.path.exists(folder_path):
+        return ""
+
+    hash_obj = hashlib.sha256()
+    has_files = False
+
+    try:
+        # Sort files to ensure deterministic hashing
+        for file in sorted(os.listdir(folder_path)):
+            if file.endswith(".md"):
+                file_path = os.path.join(folder_path, file)
+                if os.path.isfile(file_path):
+                    has_files = True
+                    # Update with filename and its modification time/size to be fast and secure
+                    hash_obj.update(file.encode('utf-8'))
+                    hash_obj.update(str(os.path.getsize(file_path)).encode('utf-8'))
+                    # Read and hash content
+                    with open(file_path, 'rb') as f:
+                        hash_obj.update(f.read())
+    except Exception as e:
+        print(f"Error calculating hash for {folder_path}: {e}", file=sys.stderr)
+
+    return hash_obj.hexdigest() if has_files else ""
+
 def find_new_feature_sessions():
     """
     Scans RAW_DOCS_DIR/STAX/history/ and RAW_DOCS_DIR/context/ to find session folders
-    that do not have a corresponding Atomic Note in ATOMIC_NODES_DIR.
+    that are new or have been updated based on their MD5 hash state in sync_state.json.
     """
-    print("\n--- Bước 2: Phát hiện các phiên làm việc (Features) mới ---")
+    print("\n--- Bước 2: Phát hiện các phiên làm việc (Features) mới hoặc thay đổi ---")
     history_dir = os.path.join(RAW_DOCS_DIR, "STAX", "history")
     context_dir = os.path.join(RAW_DOCS_DIR, "context")
 
     sessions = []
+
+    # Load existing sync state
+    sync_state = {}
+    if os.path.exists(STATE_FILE):
+        try:
+            with open(STATE_FILE, 'r', encoding='utf-8') as f:
+                sync_state = json.load(f)
+        except Exception as e:
+            print(f"Warning: Could not read {STATE_FILE}, will recreate it. Error: {e}", file=sys.stderr)
 
     # Helper to check if a session is already processed by scanning existing atomic notes
     existing_notes = []
     if os.path.exists(ATOMIC_NODES_DIR):
         existing_notes = [f for f in os.listdir(ATOMIC_NODES_DIR) if f.endswith(".md")]
 
-    def is_session_processed(slug):
-        # Look for matching slug in existing atomic note contents
+    def is_session_processed(slug, folder_path):
+        # 1. First, check if hash matches saved state (optimal path)
+        folder_hash = calculate_folder_hash(folder_path)
+        if slug in sync_state and sync_state[slug] == folder_hash:
+            return True, folder_hash
+
+        # 2. Check if the file physically exists as backup
         for note in existing_notes:
-            note_path = os.path.join(ATOMIC_NODES_DIR, note)
-            try:
-                with open(note_path, 'r', encoding='utf-8') as f:
-                    content = f.read()
-                    if slug in content or note.startswith(f"dom-{slug}") or note.startswith(f"hb-{slug}"):
-                        return True
-            except Exception:
-                pass
-        return False
+            if note.startswith(f"dom-{slug}") or note.startswith(f"hb-{slug}") or note.startswith(f"arch-{slug}") or note.startswith(f"hist-{slug}"):
+                # File exists physically, if it's not in sync_state, let's bootstrap it
+                if folder_hash:
+                    sync_state[slug] = folder_hash
+                    # Save state dynamically
+                    try:
+                        with open(STATE_FILE, 'w', encoding='utf-8') as f:
+                            json.dump(sync_state, f, indent=2, ensure_ascii=False)
+                    except Exception:
+                        pass
+                return True, folder_hash
+
+        return False, folder_hash
 
     # Scan history
     if os.path.exists(history_dir):
@@ -166,12 +216,14 @@ def find_new_feature_sessions():
             entry_path = os.path.join(history_dir, entry)
             if os.path.isdir(entry_path) and "_" in entry:
                 slug = entry.split("_", 1)[1]
-                if not is_session_processed(slug):
+                is_proc, f_hash = is_session_processed(slug, entry_path)
+                if not is_proc:
                     sessions.append({
                         "name": entry,
                         "slug": slug,
                         "path": entry_path,
-                        "type": "history"
+                        "type": "history",
+                        "hash": f_hash
                     })
 
     # Scan active context
@@ -180,15 +232,17 @@ def find_new_feature_sessions():
             entry_path = os.path.join(context_dir, entry)
             if os.path.isdir(entry_path) and "_" in entry:
                 slug = entry.split("_", 1)[1]
-                if not is_session_processed(slug):
+                is_proc, f_hash = is_session_processed(slug, entry_path)
+                if not is_proc:
                     sessions.append({
                         "name": entry,
                         "slug": slug,
                         "path": entry_path,
-                        "type": "context"
+                        "type": "context",
+                        "hash": f_hash
                     })
 
-    print(f"Phát hiện thấy {len(sessions)} phiên làm việc mới chưa được số hóa:")
+    print(f"Phát hiện thấy {len(sessions)} phiên làm việc mới hoặc có thay đổi chưa được số hóa:")
     for s in sessions:
         print(f" - [{s['type'].upper()}] {s['name']}")
     return sessions
@@ -424,6 +478,15 @@ def main():
         print("\n🎉 Không có tính năng mới nào cần số hóa. Tất cả đã đồng bộ hoàn hảo!")
         sys.exit(0)
 
+    # Load sync state to update dynamically
+    sync_state = {}
+    if os.path.exists(STATE_FILE):
+        try:
+            with open(STATE_FILE, 'r', encoding='utf-8') as f:
+                sync_state = json.load(f)
+        except Exception:
+            pass
+
     # 4. Ingest and synthesize each feature
     success_count = 0
     consecutive_failures = 0
@@ -443,6 +506,15 @@ def main():
             update_routing_table_and_index(note_id, note_content)
             success_count += 1
             consecutive_failures = 0
+
+            # Update hash state to sync_state.json
+            sync_state[session["slug"]] = session["hash"]
+            try:
+                with open(STATE_FILE, 'w', encoding='utf-8') as f:
+                    json.dump(sync_state, f, indent=2, ensure_ascii=False)
+                print(f" -> Đã lưu trạng thái Hash của {session['slug']} vào sync_state.json.")
+            except Exception as e:
+                print(f"Warning: Could not write state file: {e}", file=sys.stderr)
         else:
             consecutive_failures += 1
             print(f"❌ Không thể tạo nốt nguyên tử cho {session['name']}.")

@@ -1,37 +1,40 @@
 ---
 id: dom-audit-log-management
-title: Hệ thống Quản trị Audit Log
+title: Hệ Thống Quản Trị Audit Log
 layer: 3-atomic
 parent: "[[04_domain_knowledge]]"
 depends_on:
   - "[[hb-delta-logging]]"
-  - "[[dom-accounting-finote]]"
-summary: "Hệ thống giám sát Audit Log thời gian thực (Polling 30s) hỗ trợ so sánh dữ liệu Delta JSON và điều hướng nhanh đến tài nguyên."
-tags: [audit-log, polling, delta-view, monitoring, system-module]
+summary: "Hệ thống giám sát Audit Log thời gian thực sử dụng TanStack Query Polling, hỗ trợ Delta View đối sánh dữ liệu JSON và Smart Routing."
+tags: [audit-log, polling, delta-view, smart-routing, monitoring]
 ---
 
-## 1. Kiến trúc & Thiết kế Kỹ thuật
-*   **Cơ chế Live Monitor:** Sử dụng TanStack Query Polling (interval 30s) trên nền tảng RESTful API để đảm bảo giám sát liên tục mà không phát sinh chi phí hạ tầng WebSocket.
-*   **Cơ chế Delta Logging:** Lưu vết trạng thái dữ liệu trước (`before`) và sau (`after`) dưới dạng JSON struct. Giao diện hiển thị trực quan qua Delta View Modal.
-*   **Smart Routing:** Tích hợp liên kết động (Smart Link) cho phép điều hướng trực tiếp từ dòng log đến thực thể liên quan trong CRM (Leads, Contracts) và Accounting (`[[dom-accounting-finote]]`).
+### 1. Giải Pháp Kiến Trúc & Thiết Kế
+* **Cơ chế Real-time (Polling over WebSocket):** Sử dụng TanStack Query Polling với chu kỳ `30s` để tận dụng hạ tầng RESTful sẵn có, giảm tải hạ tầng và đảm bảo tính cập nhật liên tục.
+* **Delta Logging & View:** Biểu diễn trực quan biến động dữ liệu bằng cách lưu trữ và so sánh trạng thái trước (`before`) và sau (`after`) dưới dạng JSON formatted trong Modal chi tiết.
+* **Smart Routing:** Tích hợp liên kết điều hướng nhanh từ dòng log đến trực tiếp các tài nguyên liên quan trong CRM (`[[dom-crm-leads]]`, `[[dom-crm-contracts]]`) và Kế toán (`[[dom-accounting-finote]]`).
 
-## 2. API Contract & Schema Tham chiếu
+### 2. Thiết Kế API & Cấu Trúc Dữ Liệu
 ```typescript
 interface AuditLog {
   id: string;
-  userId: string;
-  action: 'CREATE' | 'UPDATE' | 'DELETE' | 'AUTH';
+  timestamp: string; // ISO 8601
   module: 'CRM' | 'ACCOUNTING' | 'SYSTEM';
   severity: 'INFO' | 'WARNING' | 'ERROR' | 'CRITICAL';
+  action: string;
+  userId: string;
+  resourceId: string;
   delta: {
     before: Record<string, any> | null;
     after: Record<string, any> | null;
   };
-  resourceId: string;
-  createdAt: string;
 }
 ```
 
-## 3. Khắc phục Sự cố & Tối ưu
-*   **Fix Type Mismatch:** Đồng bộ và sửa lỗi kiểu dữ liệu tham số đầu vào cho component `RoleDetail` trong cấu hình Router hệ thống.
-*   **Responsive DataGrid:** Cấu hình thuộc tính cuộn ngang (horizontal scroll) và ghim cột (column pinning) trên UI Grid để hiển thị tốt trên thiết bị di động.
+### 3. Xử Lý Điểm Nghẽn (Troubleshooting)
+* **Type Mismatch:** Khắc phục triệt để lỗi ép kiểu / truyền sai tham số cho cấu hình định tuyến của component `RoleDetail`.
+* **UI/UX DataGrid:** Tối ưu CSS Grid cho phép cuộn ngang (horizontal scroll) mượt mà trên Mobile view.
+
+### 4. Roadmap Phát Triển Tiếp Theo
+* Bổ sung tính năng kết xuất (Export) dữ liệu báo cáo dạng Excel/CSV.
+* Tích hợp Dashboard Widget thống kê tần suất lỗi (`ERROR`/`CRITICAL`) theo chuỗi thời gian thực.

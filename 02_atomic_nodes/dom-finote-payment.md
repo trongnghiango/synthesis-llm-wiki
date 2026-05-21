@@ -1,27 +1,31 @@
 ---
 id: dom-finote-payment
-title: Tích hợp nghiệp vụ Ghi nhận thanh toán Finote
+title: Thiết kế Luồng Ghi nhận Thanh toán Finote
 layer: 3-atomic
 parent: "[[04_domain_knowledge]]"
 depends_on:
   - "[[dom-accounting-finote]]"
-summary: "Thiết kế component và API tích hợp ghi nhận thanh toán Finote (Partial/Full) sử dụng Server-Driven UI và Shared Contract Zod."
-tags: [accounting, finote, payment, react-hook-form, server-driven-ui, zod]
+summary: "Đặc tả kỹ thuật cơ chế ghi nhận thanh toán Finote sử dụng Server-Driven UI, Shared Zod Contract và query invalidation."
+tags: [accounting, finote, payment, sdui, zod, react-hook-form]
 ---
 
-## 1. Cơ chế Server-Driven UI (SDUI) & Phân quyền
-- Hiển thị nút "Ghi nhận thanh toán" tại `FinoteDetailPage` và Action Menu của `FinotesPage` dựa hoàn toàn vào flag `finote._actions.recordPayment?.allowed` từ Backend.
-- Đảm bảo tính nhất quán cho State Machine từ Server, Frontend không tự quyết định logic ẩn/hiện nút.
+### 1. Cơ chế Điều khiển UI (Server-Driven UI)
+- **Ẩn/Hiện Action:** Nút "Ghi nhận thanh toán" tại `FinotesPage` (List Dropdown) và `FinoteDetailPage` được quyết định bởi backend thông qua trường:
+  `finote._actions.recordPayment?.allowed: boolean`
+- **Luồng Trạng thái:** Sau khi thanh toán thành công, gọi `queryClient.invalidateQueries` để kích hoạt fetch lại dữ liệu tự động, chuyển trạng thái Finote sang `PARTIALLY_PAID` hoặc `PAID`.
 
-## 2. API Contract & Type Safety
-- **Shared Schema**: Sử dụng trực tiếp `RecordFinotePaymentSchema` từ backend shared contracts.
-- **Type Inference**: Infer kiểu dữ liệu `RecordFinotePaymentInput` từ Zod Schema trên FE để đảm bảo an toàn kiểu dữ liệu (TypeScript compile pass 100%).
-- **API Endpoint**: Tích hợp thông qua `accountingApi.recordFinotePayment(data)`.
+### 2. Biểu mẫu & Validation (Form & Contract)
+- **Shared Schema:** Sử dụng trực tiếp `RecordFinotePaymentSchema` từ backend contracts.
+- **Type Safety:** Định nghĩa kiểu dữ liệu đồng bộ bằng Zod Inference:
+  ```typescript
+  type RecordFinotePaymentInput = z.infer<typeof RecordFinotePaymentSchema>;
+  ```
+- **Ràng buộc Client:** 
+  - Giá trị mặc định của ô nhập tiền = `remainingAmount` (Tổng tiền - Đã thanh toán).
+  - Giới hạn nhập tối đa: `max={remainingAmount}`.
 
-## 3. UI/UX & Quản lý State
-- **Component**: Thiết lập `RecordPaymentDialog` (Modal) bằng `react-hook-form` + `zodResolver`.
-- **Ràng buộc dữ liệu**:
-  - Giá trị mặc định cho ô số tiền: `remainingAmount` (Tổng tiền - Đã thanh toán).
-  - Giới hạn Input: `max={remainingAmount}` để ngăn ngừa nhập quá số tiền cần thanh toán.
-- **Đồng bộ hóa dữ liệu**: Gọi `queryClient.invalidateQueries` ngay sau khi thanh toán thành công để cập nhật tức thì trạng thái UI sang `PARTIALLY_PAID` hoặc `PAID`.
-- **Hiển thị**: Lịch sử thanh toán (`finote.payments`) hiển thị song song với Audit Log, định dạng tiền tệ VND.
+### 3. API & Lưu trữ Dữ liệu
+- **Endpoint:** `accountingApi.recordFinotePayment(data: RecordFinotePaymentInput)`
+- **Cấu trúc dữ liệu mở rộng:**
+  - `finote.payments`: Mảng lịch sử các lần thanh toán (hiển thị theo VND).
+  - Tích hợp ghi nhận log giao dịch thông qua `[[hb-delta-logging]]`.

@@ -1,26 +1,24 @@
 ---
 id: arch-unit-of-work
-title: Unit of Work Pattern trong Clean Architecture
+title: Pattern Unit of Work & Quản lý Giao dịch
 layer: 3-atomic
 parent: "[[01_core_architecture]]"
 depends_on:
   - "[[hb-drizzle-base-repo]]"
-summary: "Hướng dẫn áp dụng Unit of Work qua ITransactionManager đảm bảo tính ACID khi điều phối nhiều Repository/Module trong một Use Case."
-tags: [architecture, ddd, unit-of-work, transaction, nestjs]
+summary: "Quy chuẩn áp dụng Unit of Work (UoW) qua ITransactionManager để đảm bảo tính toàn vẹn dữ liệu (ACID) khi điều phối nghiệp vụ liên module."
+tags: [architecture, uow, transaction, clean-architecture, ddd]
 ---
 
-## 1. Bản chất & Core Interface
-* **Unit of Work (UoW)**: Gom tất cả tác vụ ghi DB trong một Use Case vào một Database Transaction duy nhất. Thất bại một bước -> Rollback toàn bộ để đảm bảo tính toàn vẹn dữ liệu.
-* **Interface trừu tượng (`ITransactionManager`):**
+### 1. Kiến trúc Core
+Mẫu thiết kế UoW trừu hóa Database Transaction qua `ITransactionManager` nhằm cô lập và đảm bảo tính nguyên tử (Atomicity) cho Use Case liên module.
+
 ```typescript
 export interface ITransactionManager {
   runInTransaction<T>(work: (tx: any) => Promise<T>): Promise<T>;
 }
 ```
 
-## 2. Triển khai Use Case Điều phối (Orchestrator)
-Use Case nhận `ITransactionManager` và truyền kết nối transaction (`tx`) xuyên suốt qua các Repository của các Module khác nhau:
-
+### 2. Mẫu Triển Khai Use Case (Orchestrator)
 ```typescript
 @Injectable()
 export class OnboardEmployeeUseCase {
@@ -31,20 +29,21 @@ export class OnboardEmployeeUseCase {
   ) {}
 
   async execute(dto: any): Promise<any> {
-    // 1. Validation (Ngoại vi transaction để giảm Lock DB)
-    if (!dto.email) throw new BadRequestException('Email invalid');
+    // 1. Validation ngoài Transaction để tối ưu hiệu năng
+    if (await this.userRepo.exists(dto.email)) throw new BadRequestException();
 
-    // 2. Chạy Unit of Work
+    // 2. Thực thi Unit of Work
     return this.txManager.runInTransaction(async (tx) => {
-      const user = await this.userRepo.save(new User(dto), tx); // Truyền tx
-      const employee = await this.employeeRepo.save({ userId: user.id, ...dto }, tx); 
-      return { user, employee }; // Tự động COMMIT nếu thành công, ROLLBACK nếu quăng Error
+      const user = await this.userRepo.save(new User(dto), tx); // Bắt buộc truyền tx
+      const employee = await this.employeeRepo.save({ userId: user.id, ...dto }, tx);
+      return { user, employee };
     });
   }
 }
 ```
 
-## 3. Quy tắc Thiết kế Bắt buộc
-1. **Truyền `tx` bắt buộc**: Quên truyền `tx` vào bất kỳ Repository nào trong block transaction sẽ phá vỡ UoW, gây rác dữ liệu.
-2. **Tách biệt Đọc/Ghi**: Tác vụ đọc (Read/Validate) nên đặt bên ngoài `runInTransaction` để tối ưu hiệu năng và tránh deadlock DB.
-3. **Use Case siêu mỏng**: Use Case chỉ đóng vai trò nhạc trưởng điều phối. Logic nghiệp vụ lõi (Core Domain Logic) phải nằm ở Domain Entity hoặc Domain Service.
+### 3. Nguyên Tắc Vàng
+1. **Vai trò Use Case:** Chỉ làm nhiệm vụ điều phối (Orchestrator). Logic nghiệp vụ cốt lõi phải nằm ở Domain Entity hoặc Domain Service.
+2. **Lan truyền Giao dịch (`tx`):** Mọi thao tác ghi dữ liệu thuộc UoW bắt buộc phải truyền tham số `tx` xuống Repository tương ứng.
+3. **Tối ưu hóa khóa (Lock):** Tác vụ đọc/kiểm tra dữ liệu (Read-only validation) nên thực hiện trước/ngoài block `runInTransaction`.
+4. **Xử lý ngoại lệ:** Mọi lỗi phát sinh trong block `runInTransaction` phải được throw ra ngoài để trigger tự động Rollback.

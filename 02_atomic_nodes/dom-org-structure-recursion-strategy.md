@@ -5,30 +5,36 @@ layer: 3-atomic
 parent: "[[04_domain_knowledge]]"
 depends_on:
   - "[[hb-drizzle-base-repo]]"
-summary: "Cơ chế truy vấn đệ quy qua Materialized Path (LIKE path%) hỗ trợ tổng hợp dữ liệu phòng ban con."
-tags: [org-structure, recursion, drizzle-orm, api]
+summary: "Giải pháp truy vấn đệ quy cây cơ cấu tổ chức sử dụng thuộc tính path và toán tử LIKE trên Drizzle ORM"
+tags: [org-structure, recursion, drizzle-orm, hierarchical-data, hrm-api]
 ---
 
-### 1. API Contract & Database Schema
-- **Query Params**: Bổ sung `includeDescendants?: boolean` vào API truy vấn nhân sự/vị trí.
-- **Cơ chế lọc**: Dựa trên trường `path` (Materialized Path) của bảng `org_units`.
+### 1. Nguyên lý Thiết kế (Path-based Hierarchy)
+- Sử dụng mô hình Materialized Path (`orgUnits.path`) để quản lý cấu trúc cây phân cấp của đơn vị tổ chức.
+- Truy vấn đệ quy tất cả các đơn vị con (descendants) bằng toán tử `LIKE 'parentPath%'` thay thế cho CTE đệ quy nhằm tối ưu hóa hiệu năng truy vấn.
 
-### 2. Backend Implementation (Drizzle ORM)
-Tích hợp logic truy vấn đệ quy tại `OrgStructureRepository` (kế thừa từ `[[hb-drizzle-base-repo]]`):
-
+### 2. Thiết kế API Contract
+Cập nhật interface query tham số cho API `getPositions` và `getEmployees` trong `hrm.api.ts`:
 ```typescript
-if (query.includeDescendants && query.orgUnitId) {
-  const parent = await db.query.orgUnits.findFirst({ where: eq(orgUnits.id, query.orgUnitId) });
-  if (!parent) return [];
-  
-  return db.select().from(positions)
-    .innerJoin(orgUnits, eq(positions.orgUnitId, orgUnits.id))
-    .where(like(orgUnits.path, `${parent.path}%`));
+interface OrgQueryDto {
+  orgUnitId?: string;
+  includeDescendants?: boolean; // Thêm cờ toggle truy vấn gộp
 }
 ```
 
-### 3. Frontend Integration
-- **API (`hrm.api.ts`)**: Cập nhật Interface tham số `getPositions` và `getEmployees` để truyền `includeDescendants`.
-- **UI (`OrgChart.tsx` & `org-structure.tsx`)**:
-  - `OrgNode`: Hiển thị đồng thời hai chỉ số: `Direct` (nhân sự trực tiếp) và `Total` (bao gồm con).
-  - `DeptDetails`: Thêm Toggle `Switch` để kích hoạt trạng thái xem "Bao gồm đơn vị con".
+### 3. Logic Xử lý Backend (Drizzle ORM)
+Bổ sung logic tìm kiếm đệ quy tại Repository Layer:
+```typescript
+if (query.includeDescendants && query.orgUnitId) {
+  const parentUnit = await db.query.orgUnits.findFirst({ where: eq(orgUnits.id, query.orgUnitId) });
+  if (!parentUnit) throw new Error("Org unit not found");
+
+  return db.select().from(positions)
+    .innerJoin(orgUnits, eq(positions.orgUnitId, orgUnits.id))
+    .where(like(orgUnits.path, `${parentUnit.path}%`));
+}
+```
+
+### 4. Giao diện (Presentation Layer)
+- **`OrgChart.tsx`**: Component `OrgNode` hiển thị song song hai chỉ số: `Direct` (nhân sự trực tiếp tại đơn vị) và `Total` (nhân sự tổng bao gồm cả đơn vị con).
+- **`org-structure.tsx` (DeptDetails)**: Tích hợp Toggle Switch "Bao gồm đơn vị con" để thay đổi tham số `includeDescendants` khi gọi API.

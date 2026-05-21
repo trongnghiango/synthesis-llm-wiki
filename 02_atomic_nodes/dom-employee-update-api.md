@@ -1,42 +1,40 @@
 ---
 id: dom-employee-update-api
-title: API Cập nhật Nhân sự (Employee Update)
+title: API Cập nhật Nhân sự và Ràng buộc Vị trí
 layer: 3-atomic
 parent: "[[04_domain_knowledge]]"
 depends_on:
-  - "[[arch-tenant-isolation]]"
+  - "[[arch-als-tenant-isolation]]"
   - "[[hb-drizzle-base-repo]]"
-summary: "Quy trình nghiệp vụ và API contract cập nhật thông tin nhân sự bảo mật đa thuê bao (multi-tenancy) và ràng buộc vị trí."
-tags: [hrm, employee, api-patch, multi-tenancy, validation]
+summary: "Định nghĩa API PATCH cập nhật thông tin nhân viên kèm kiểm tra ràng buộc vị trí và cô lập tenant."
+tags: [hrm, employee, api, tenant-isolation, validation]
 ---
 
-# Nghiệp vụ Cập nhật Nhân sự (PATCH /api/hrm/employees/:id)
+### 1. API Contract
+- **Endpoint**: `PATCH /api/hrm/employees/:id`
+- **DTO (`UpdateEmployeeRequestDto`)**:
+  ```ts
+  type UpdateEmployeeRequestDto = Partial<{
+    fullName: string; 
+    phoneNumber: string; 
+    locationId: number;
+    positionId: number; 
+    managerId: number; 
+    dateOfBirth: Date;
+    avatarUrl: string; 
+    joinDate: Date;
+  }>;
+  ```
 
-Giải quyết lỗi `404` bằng việc cung cấp API cập nhật thông tin nhân viên, tích hợp kiểm soát đa chi nhánh `[[arch-tenant-isolation]]`.
-
-## 1. API Contract (DTO)
-```typescript
-export class UpdateEmployeeRequestDto {
-  fullName?: string;
-  phoneNumber?: string;
-  locationId?: number;
-  positionId?: number;
-  managerId?: number;
-  dateOfBirth?: Date;
-  avatarUrl?: string;
-  joinDate?: Date;
-}
-```
-
-## 2. Quy trình Xử lý & Ràng buộc (Service Layer)
-Áp dụng qua Repository tuần tự (`[[hb-drizzle-base-repo]]`):
-1. **Kiểm tra Quyền sở hữu (Multi-tenancy):**
-   * Truy vấn `employee` theo `id`.
-   * Bắt buộc `employee.organizationId == currentUser.organizationId`. Sai lệch -> Ném `ForbiddenError`.
-2. **Xác thực Vị trí (Position Validation):**
-   * Nếu có `positionId`: Truy vấn `position` tương ứng.
-   * Yêu cầu `position.organizationId == currentUser.organizationId` và `position.isActive == true`.
-3. **Cập nhật Dữ liệu:**
-   * Ghi đè các trường thay đổi từ DTO vào Entity.
-   * Tự động cập nhật thuộc tính `updatedAt`.
-   * Lưu thay đổi thông qua Repo và kích hoạt ghi log (`[[hb-delta-logging]]`).
+### 2. Luồng Xử lý & Ràng buộc (Flow & Constraints)
+1. **Cô lập Tenant**: Lấy `orgId` từ Context thông qua `[[arch-als-tenant-isolation]]`.
+2. **Xác thực Nhân sự**: 
+   - Kiểm tra nhân viên tồn tại theo `:id`.
+   - Xác thực: `employee.organizationId === orgId`. Sai trả về lỗi `403 Forbidden`.
+3. **Ràng buộc Vị trí** (Nếu có `positionId` trong DTO):
+   - Truy vấn `Position` theo `positionId`.
+   - Yêu cầu: `position.organizationId === orgId` và `position.isActive === true`.
+4. **Cập nhật**:
+   - Ghi đè các trường thay đổi từ DTO vào thực thể Employee.
+   - Hệ thống tự động cập nhật trường `updatedAt`.
+   - Thực thi lưu trữ qua `[[hb-drizzle-base-repo]]`.
