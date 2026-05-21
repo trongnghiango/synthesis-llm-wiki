@@ -8,6 +8,7 @@ Chào mừng bạn đến với Layer 3 - Hệ thống **Nốt nguyên tử (Ato
 
 | Nốt Nguyên Tử | Tóm tắt (1 dòng) | Phụ thuộc | Tags |
 | :--- | :--- | :--- | :--- |
+| [[arch-migrate-tanstack-router]] | Chuyển đổi từ wouter sang TanStack Router, nâng cấp Type-Safe Navigation, Router Guards và tối ưu hóa UI Org Chart | *Tự động* | `#routing ` #tanstack-router ` #react ` #layout ` #org-chart` |
 | [[dom-domain-hardening]] | Đóng gói trạng thái thực thể Finote, loại bỏ magic strings và sửa lỗi vi phạm Clean Architecture. | *Tự động* | `#domain-driven-design ` #encapsulation ` #refactoring ` #security ` #clean-architecture` |
 | [[arch-professional-api-integration]] | Tái cấu trúc System Module với Service Layer, chuẩn Backend-Driven UI (_actions) và bổ sung API điều phối/báo cáo. | *Tự động* | `#system-module ` #backend-driven-ui ` #action-dto ` #api-contract` |
 | [[arch-architecture_blueprint_v1_rollout]] | Thiết lập nền tảng Modular Monolith và thực hiện Phase 0 & Phase 1 Client Modularization cho dự án STAX. | *Tự động* | `#architecture ` #modular-monolith ` #client-refactor ` #api-modularization ` #bff` |
@@ -62,6 +63,10 @@ Chào mừng bạn đến với Layer 3 - Hệ thống **Nốt nguyên tử (Ato
 
 | Nốt Nguyên Tử | Tóm tắt (1 dòng) | Phụ thuộc | Tags |
 | :--- | :--- | :--- | :--- |
+| [[dom-crm-activity-feed-metadata]] | Chuẩn hóa cơ chế Activity Feed, Audit Trail và liên kết dữ liệu Timeline đa thực thể (Lead, Org, Contract) tích hợp Actor Tracking. | *Tự động* | `#crm ` #activity-feed ` #audit-log ` #metadata ` #event-driven` |
+| [[dom-org-structure-position-api]] | API lấy danh sách vị trí định biên theo đơn vị tổ chức (Org Unit) sử dụng Drizzle ORM và phân quyền org:read. | *Tự động* | `#api ` #org-structure ` #position ` #drizzle ` #authorization` |
+| [[dom-fix_lead_acquired_at_display]] | Đồng bộ LeadResponseDto để trả về đúng trường dữ liệu acquiredAt từ database, khắc phục lỗi hiển thị trùng ngày tạo trên UI Kanban. | *Tự động* | `#crm ` #lead ` #acquired-at ` #dto ` #api` |
+| [[dom-crm-client-360]] | Đặc tả kỹ thuật trang Client 360° (ClientDetail) tích hợp trạng thái tuân thủ thuế, CRM API và dòng thời gian hoạt động. | *Tự động* | `#crm ` #client-360 ` #client-detail ` #tax-compliance ` #glassmorphism` |
 | [[dom-stax-implementation-roadmap]] | Lộ trình triển khai STAX 22 tuần (11 Sprints) kèm đặc tả kiến trúc kỹ thuật lõi. | *Tự động* | `#roadmap ` #agile ` #architecture-design ` #db-schema` |
 | [[dom-crm-lead-normalization]] | Chuẩn hóa thực thể Lead bằng cách liên kết Contact qua contact_id và di trú thành công 1172 records kế thừa. | *Tự động* | `#crm ` #database-normalization ` #drizzle ` #lead-migration` |
 | [[dom-hrm-employee-update]] | Định nghĩa API PATCH /api/hrm/employees/:id tích hợp ràng buộc multi-tenancy và kiểm tra chéo vị trí nhân sự. | *Tự động* | `#hrm ` #employee ` #api ` #validation ` #multi-tenancy` |

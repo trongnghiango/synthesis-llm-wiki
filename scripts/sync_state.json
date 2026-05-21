@@ -28,5 +28,14 @@
   "standardization_and_cleanup": "e07c73ffd3c17d175c5bc85a68d918dac9b90e6477f0e0cc273458286ad9d18b",
   "finote_payment": "1e0ae9e9f44eb63442d00f0d01f5cc3b34defbfdc3bd21da238789a991ef6fcb",
   "accounting_foundation": "0c764eb6f50f97627bfe0184568b459b3a1a36a7e7424a15afa15a555b25c2e4",
-  "crm_analytics_service": "0a75d7e7fabb58ca673b9591bf9de3f9ea15b95d9efefc2983e75d453e56bce7"
+  "crm_analytics_service": "0a75d7e7fabb58ca673b9591bf9de3f9ea15b95d9efefc2983e75d453e56bce7",
+  "client_360_view": "22ad0621bedc6fbdd4d92a9596060636e3dffef592307bf3ed62e9f691e7ff73",
+  "unit_of_work": "ba11cd9d0958ea61466a9dfb26fdc6febd181d3a389d240de71d2cca21af41df",
+  "fix_lead_acquired_at_display": "77c87fa9651a9f36e363801d8127c9baaa00adf09917f1e370fd5a1f57a618ee",
+  "migrate_tanstack_router": "50b80700e2ba7a8c3a8d6ab53716e20638af441bbd184b332e0d72c2142e6c17",
+  "service_catalog": "a9ce1fb0321d10b7ae802c43cb1bd0a0e608dd9e55b3afd2a146c514b9afa763",
+  "accounting_module_research": "2abb0dce57acb0143c2d1039434d45387a8ba64b274b4a09ea78eb25aa5802cd",
+  "architecture_audit_auditlog": "c333a2ceeb994294ea8447fd454c12ce2b9aec64df221d51e22f3f32fd097818",
+  "implement_position_api": "7d94e8940ae05c551ed05fb2be980fb875fe1aba8dbfcf9e9990433fa494b882",
+  "professional_activity_feed_and_structured_metadata": "334c7d40b2b73b94514dc7c9445083863ab54a5d531e3a4daafc05e554b73f1b"
 }
