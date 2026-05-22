@@ -4,76 +4,132 @@ description: "Xử lý task nhỏ, sửa bug, hoặc fix lỗi từ naming-audit
 risk: low
 source: custom-stax-team
 date_added: "2026-05-09"
-version: "1.1.0"
+version: "2.0.0"
 ---
 
 # STAX Quick Task & Micro-feature Implementation
 
-## Purpose
+## 1. Mục đích
 
 Thực thi nhanh gọn các yêu cầu nhỏ lẻ (thêm field, thêm endpoint, sửa bug) trên các module CÓ SẴN.
-Bỏ qua quy trình sinh tài liệu Context rườm rà để tối ưu tốc độ, nhưng **TUÂN THỦ TUYỆT ĐỐI** kiến trúc STAX và có cơ chế bảo vệ dự án khỏi tình trạng Scope Creep (phình to yêu cầu).
+
+Bỏ qua quy trình sinh tài liệu Context rườm rà để tối ưu tốc độ, nhưng **TUÂN THỦ TUYỆT ĐỐI** kiến trúc STAX và có cơ chế bảo vệ dự án khỏi Scope Creep.
 
 ---
 
-## Operating Modes (Chế độ đầu vào)
+## 2. Chế độ Đầu vào (Operating Modes)
 
-Khi bắt đầu, hãy xác định bạn đang ở chế độ nào:
+Khi bắt đầu, xác định chế độ:
 
-1. **Standard Mode (Task nhỏ thông thường):** User đưa ra một yêu cầu sửa đổi/thêm mới bằng văn bản.
-2. **Fix Mode (Handoff từ stax-naming-auditor):** User cung cấp một "Audit Manifest". 
-   👉 *Hành vi bắt buộc:* Bạn KHÔNG phân tích lỗi từ đầu. Hãy đọc Manifest (chứa Severity, File, Dòng, Breaking Change flag) và trực tiếp map các đề xuất sửa chữa vào code. Đặc biệt chú ý cờ `Breaking Change` để xử lý tương thích ngược nếu có.
+**Mode 1 — Standard (Task nhỏ thông thường):**
+User đưa ra yêu cầu sửa đổi/thêm mới bằng văn bản.
+
+**Mode 2 — Fix (Handoff từ stax-naming-auditor):**
+User cung cấp một "Audit Manifest" (`02_fix_manifest.md`).
+
+> *Hành vi bắt buộc Mode 2:* KHÔNG phân tích lỗi từ đầu. Đọc Manifest trực tiếp và map các đề xuất sửa chữa vào code. Đặc biệt chú ý cờ `Breaking Change` để xử lý tương thích ngược.
 
 ---
 
-## The Workflow (Quy trình Nhanh 3 Bước)
+## 3. Quy trình Nhanh 3 Bước
 
-### Bước 1: Analysis & Scope Gate (Phân tích & Chặn Over-scope)
+### Bước 1: Pre-Scope Check & Analysis (Phân tích & Chặn Over-scope)
 
-Khi nhận yêu cầu, BẮT BUỘC rà soát nhanh codebase và trả lời trong **1 tin nhắn duy nhất**:
-- Lỗi/Tính năng này nằm ở file nào? (Hoặc list file từ Audit Manifest).
-- Phương án sửa/thêm mới là gì? (Bullet points ngắn gọn).
-- 🛑 **GATE CHỐNG OVER-SCOPE:** Nếu phương án yêu cầu tạo Module mới hoàn toàn, sửa đổi cấu trúc Database lõi, hoặc chạm vào **nhiều hơn 3 files logic**, bạn BẮT BUỘC phải DỪNG LẠI và phản hồi: *"Yêu cầu này vượt quá scope của quick-task. Hãy dùng skill `stax-feature-implementation` để đảm bảo an toàn kiến trúc."*
+**[BẮTT BUỘC TRƯỚC KHI ESTIMATE]** — Chạy lệnh search thực tế, KHÔNG tự estimate bằng trí nhớ:
 
-👉 _Nếu pass Scope Gate, hỏi User: "Phương án này OK chưa để tôi bắt đầu code?"_
+```bash
+# Tìm tất cả file bị ảnh hưởng bởi symbol/function/type cần sửa
+grep -r "[tên symbol/function/type]" src/ --include="*.ts" -l
+
+# Dán kết quả vào chat. Số dòng output = số file thực tế bị ảnh hưởng.
+```
+
+Sau khi có kết quả grep, trả lời trong **1 tin nhắn duy nhất**:
+- Lỗi/Tính năng này nằm ở file nào?
+- Phương án sửa/thêm mới là gì? (Bullet points ngắn gọn)
+- Số file thực tế bị ảnh hưởng: [N file]
+
+**🛑 SCOPE GATE:** Nếu phương án yêu cầu:
+- Tạo Module mới hoàn toàn, HOẶC
+- Sửa đổi cấu trúc Database lõi, HOẶC
+- Chạm vào **nhiều hơn 3 files logic** (dựa trên kết quả grep thực tế)
+
+→ BẮT BUỘC DỪNG và phản hồi:
+*"Yêu cầu này vượt quá scope của quick-task. Hãy dùng skill `@stax-backend` hoặc `@stax-frontend` để đảm bảo an toàn kiến trúc."*
+
+Nếu pass Scope Gate, hỏi: *"Phương án này OK chưa để tôi bắt đầu code?"*
+
+---
 
 ### Bước 2: Coding & Anti-Creep (Thực thi & Chặn phình task)
 
-Sau khi User đồng ý, tiến hành viết code tuân thủ **Luật Thép STAX** bên dưới.
-🛑 **ANTI-SCOPE CREEP:** Nếu trong quá trình này User bổ sung thêm các yêu cầu mới không có trong thỏa thuận ở Bước 1, bạn BẮT BUỘC TỪ CHỐI code tiếp các phần mới, cảnh báo User về Scope Creep và yêu cầu hoàn thành task hiện tại trước.
+Sau khi User đồng ý, viết code tuân thủ **5 Luật Thép STAX** (Mục 4).
 
-### Bước 3: Quick Logging (Ghi chú thay đổi)
-
-Sau khi hoàn thiện code, KHÔNG tạo thư mục docs mới.
-Mở file (hoặc tạo nếu chưa có) theo **đúng đường dẫn này**: `docs/STAX/06_CHANGELOG.md`
-
-Thêm một mục mới lên ĐẦU file theo định dạng chuẩn:
-
-### [YYYY-MM-DD] - {Tên Task Ngắn Gọn}
-- **Module:** `tên-module`
-- **Loại:** `Feature` | `Bugfix` | `Auditor-Fix`
-- **Thay đổi:**
-  - Thêm field `x` vào schema `y`.
-  - Cập nhật service `z` để xử lý logic mới.
+**🛑 ANTI-SCOPE CREEP:** Nếu User bổ sung yêu cầu mới không có trong thỏa thuận ở Bước 1:
+- TỪ CHỐI code phần mới
+- Cảnh báo: *"Đây là yêu cầu mới ngoài scope đã thỏa thuận. Tôi sẽ hoàn thành task hiện tại trước, sau đó tạo task mới cho phần này."*
+- Ghi nhận yêu cầu mới vào danh sách pending
 
 ---
 
-## STAX Hard Constraints (5 Luật Thép Không Thể Vi Phạm)
+### Bước 3: Exit Verification & Quick Logging
+
+**[🛑 EXIT VERIFICATION — Bắt buộc trước khi báo "Xong"]**
+
+Chạy và DÁN KẾT QUẢ THỰC TẾ vào chat:
+
+```bash
+# 1. Build check
+npm run build
+# → Paste output. Nếu có error → FIX trước.
+
+# 2. No any check (chỉ trong file đã sửa)
+grep -n ": any\|as any" [đường dẫn file đã sửa]
+# → Phải trống. Nếu có → FIX trước.
+
+# 3. Test liên quan
+npm test -- --testPathPattern="[tên module]"
+# → Paste output. Phải pass xanh.
+```
+
+Sau khi verification sạch, ghi log vào `docs/STAX/06_CHANGELOG.md` (tạo nếu chưa có), thêm lên ĐẦU file:
+
+```markdown
+### [YYYY-MM-DD] - {Tên Task Ngắn Gọn}
+- **Module:** `tên-module`
+- **Loại:** `Feature` | `Bugfix` | `Auditor-Fix`
+- **Files đã sửa:** [danh sách]
+- **Thay đổi:**
+  - [mô tả thay đổi 1]
+  - [mô tả thay đổi 2]
+- **Exit Verification:** ✅ Build pass | ✅ No any | ✅ Tests pass
+```
+
+---
+
+## 4. STAX Hard Constraints (5 Luật Thép Không Thể Vi Phạm)
 
 Dù task nhỏ đến đâu, BẮT BUỘC tuân thủ:
 
 1. **No Framework Leakage:** Cấm ném `BadRequestException`, `NotFoundException` ở tầng Domain/Application. Phải ném `EntityNotFoundException` hoặc `BusinessRuleValidationException` từ `core/shared`.
+
 2. **Transaction Management:** Nếu ghi vào từ 2 bảng trở lên, bắt buộc bọc trong `this.txManager.runInTransaction(async (tx) => { ... })`.
+
 3. **DTO Strictness:** Cấm trả về Entity thô hoặc Drizzle Record ra ngoài API. Phải đi qua Mapper hoặc Response DTO.
+
 4. **No Magic Strings:** Trạng thái/phân loại phải dùng TypeScript Enum và pgEnum.
-5. **Update Safety (Bảo vệ dữ liệu):** Khi thực hiện thao tác UPDATE, tuyệt đối không được ghi đè các trường immutable. BẮT BUỘC sử dụng pattern `mapToUpdate()` (hoặc loại bỏ thủ công `id`, `createdAt`, `organizationId` khỏi payload) trước khi đẩy vào Database.
+
+5. **Update Safety:** Khi thực hiện UPDATE, tuyệt đối không ghi đè `id`, `createdAt`, `organizationId`. BẮT BUỘC sử dụng `mapToUpdate()` trước khi đẩy vào Database.
 
 ---
 
-## Exit Criteria (Điều kiện hoàn thành)
+## 5. Exit Criteria
 
-Quy trình chỉ được xem là kết thúc khi đạt ĐỦ các tiêu chí đo lường sau:
-1. Code chạy qua lệnh `npm run build` thành công (không có warning do thay đổi này gây ra).
-2. Code mới thêm KHÔNG sử dụng type `any`.
-3. Chạy unit tests liên quan pass xanh và KHÔNG xuất hiện `console.error` trong log của test.
-4. Có đúng 1 entry log tóm tắt được thêm vào file `docs/STAX/06_CHANGELOG.md`.
+```
+[ ] Pre-Scope grep đã chạy và kết quả được paste
+[ ] Scope Gate đã pass (≤3 files logic)
+[ ] 5 Luật Thép không bị vi phạm
+[ ] Exit Verification: Build pass, no any, tests pass — kết quả paste thực tế
+[ ] CHANGELOG.md đã được cập nhật với entry đúng format
+[ ] Pending requests (nếu có) đã được ghi nhận cho task tiếp theo
+```
