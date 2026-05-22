@@ -9,6 +9,7 @@ import urllib.request
 import urllib.error
 import time
 import hashlib
+import argparse
 from datetime import datetime
 
 # Path Config
@@ -486,6 +487,11 @@ def main():
     print("🔋 BẮT ĐẦU QUY TRÌNH ĐỒNG BỘ TRI THỨC TỰ ĐỘNG STAX")
     print("==================================================")
 
+    # 0. Parse arguments
+    parser = argparse.ArgumentParser(description="Đồng bộ tri thức STAX tự động.")
+    parser.add_argument("--skip-ai", type=str, help="Danh sách các slug bỏ qua AI (e.g. crm_analytics_service,all)")
+    args = parser.parse_known_args()[0]
+
     # 1. Sync raw files
     if not copy_raw_docs():
         sys.exit(1)
@@ -515,7 +521,41 @@ def main():
     success_count = 0
     consecutive_failures = 0
 
+    # Parse skip_ai configuration
+    skip_ai_sessions = []
+    skip_all = False
+    if args.skip_ai:
+        if args.skip_ai.strip().lower() == "all":
+            skip_all = True
+        else:
+            skip_ai_sessions = [s.strip() for s in args.skip_ai.split(",")]
+
     for session in new_sessions:
+        # Determine whether to skip AI for this session
+        should_skip_ai = skip_all or (session["slug"] in skip_ai_sessions)
+
+        # Ask user interactively if not explicitly skipped
+        if not should_skip_ai:
+            try:
+                user_input = input(f"\n[?] Phát hiện thay đổi tại {session['slug']}. Bạn có muốn gọi AI để cập nhật lại nốt nguyên tử? (y/N): ")
+                if user_input.strip().lower() not in ["y", "yes"]:
+                    should_skip_ai = True
+            except (KeyboardInterrupt, EOFError):
+                print("\nTác vụ bị hủy hoặc EOF. Mặc định bỏ qua AI.")
+                should_skip_ai = True
+
+        if should_skip_ai:
+            print(f" -> Bỏ qua AI cho {session['name']}. Đang cập nhật mã băm vào cache.")
+            # Update hash state directly without running AI
+            sync_state[session["slug"]] = session["hash"]
+            try:
+                with open(STATE_FILE, 'w', encoding='utf-8') as f:
+                    json.dump(sync_state, f, indent=2, ensure_ascii=False)
+                print(f" -> Đã lưu trạng thái Hash của {session['slug']} vào sync_state.json.")
+            except Exception as e:
+                print(f"Warning: Could not write state file: {e}", file=sys.stderr)
+            continue
+
         # Prevent hitting rate limits with a small sleep
         time.sleep(2)
 

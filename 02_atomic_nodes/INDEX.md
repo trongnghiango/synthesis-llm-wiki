@@ -65,6 +65,7 @@ Chào mừng bạn đến với Layer 3 - Hệ thống **Nốt nguyên tử (Ato
 
 | Nốt Nguyên Tử | Tóm tắt (1 dòng) | Phụ thuộc | Tags |
 | :--- | :--- | :--- | :--- |
+| [[dom-dynamic_pricing]] | Cấu trúc biểu phí động (pricingModel, pricingConfig) trong luồng Lead-to-Contract và liên kết tự động tạo Finote đặt cọc. | *Tự động* | `#crm ` #dynamic-pricing ` #db-schema ` #lead-to-contract` |
 | [[dom-standardize-accounting-party]] | Chuẩn hóa thông tin Đối tượng Kế toán (Party) trực tiếp trong finotes phục vụ cách ly Tenant và hiển thị tối ưu không cần JOIN. | *Tự động* | `#accounting ` #database-schema ` #domain-entity ` #tenant-isolation` |
 | [[dom-crm-kanban-reports-fe]] | Thiết kế và giải pháp kỹ thuật frontend cho Kanban Board kéo thả và Dashboard báo cáo CRM. | *Tự động* | `#frontend ` #crm ` #kanban ` #dashboard ` #react-query ` #drag-drop` |
 | [[dom-crm-activity-feed-metadata]] | Chuẩn hóa cơ chế Activity Feed, Audit Trail và liên kết dữ liệu Timeline đa thực thể (Lead, Org, Contract) tích hợp Actor Tracking. | *Tự động* | `#crm ` #activity-feed ` #audit-log ` #metadata ` #event-driven` |

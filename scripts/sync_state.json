@@ -53,5 +53,6 @@
   "crm_kanban_and_reports": "8854defa3470e47b572e41744a45941ebdf59076a5ff8071fbfd7c18f348a253",
   "standardize_accounting_party": "62b5b0e08e2720884f8583fa194e97387dee729b7a797e58c13132c82e0b4231",
   "architecture_audit_crm_accounting": "e227cdb4255ddd1b97515675a7a74ca64a222ea7235240213303c575049b008b",
-  "google_oauth2_drive": "c290454c333960c3178eff354f80dd6baa78a443e28acf571323c19f22ca461c"
+  "google_oauth2_drive": "c290454c333960c3178eff354f80dd6baa78a443e28acf571323c19f22ca461c",
+  "dynamic_pricing": "8dc2444bc3bcce9df65f97243244cc7ab942004e034a8ee8e726e3048ca6c687"
 }

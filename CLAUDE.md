@@ -169,3 +169,10 @@ When asked to summarize or ingest articles, extract three precise fields:
 
 ### 6. Non-Intrusive Reasoning
 *   Do not attempt to guide, correct, or intervene in the user's personal thought process or reasoning style. The user's input/thought process is sovereign.
+
+### 7. Interactive Knowledge Synthesis (Quy trình Tương tác Số hóa Tri thức)
+When requested to perform synchronization, processing, or synthesis of raw documents under `00_raw_docs/STAX/history/` or `00_raw_docs/context/` into atomic notes:
+*   **Step 1 (Diff Review):** Scan the folders and show the user a summary of changes or diffs. Do NOT trigger any LLM synthesis or file edits yet.
+*   **Step 2 (Step-by-step Prompt):** Ask the user interactively, folder by folder: "Phát hiện thay đổi tại chuyên đề [{slug}]. Bạn có muốn đồng bộ (synthesis) tài liệu này không? (y/N)". Wait for user response for each file before proceeding to the next.
+*   **Step 3 (Final Gate):** Display a summary of all selected folders and ask for final confirmation: "Bạn có chắc chắn muốn tiến hành gọi API để synthesis danh sách các tài liệu trên không? (y/N)".
+*   **Step 4 (Execution):** Only execute the synthesis, write to `02_atomic_nodes/`, and update index/routing tables if the final confirmation is yes. Otherwise, do NOT call the API or modify any files.
