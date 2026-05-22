@@ -8,16 +8,16 @@ Tài liệu này hệ thống hóa các tri thức nghiệp vụ cốt lõi, t�
 
 Để tránh hiểu nhầm giữa bộ phận Phân tích Nghiệp vụ (BA), Lập trình viên (Dev), và AI Agent, toàn bộ hệ thống bắt buộc phải sử dụng chung các thuật ngữ sau:
 
-| Thuật ngữ tiếng Việt | Định danh kỹ thuật | Mô tả & Ranh giới |
-| :--- | :--- | :--- |
-| **Doanh nghiệp / Thuê** | `Organization` | Đơn vị thuê dịch vụ, ranh giới phân tách dữ liệu cao nhất (Multi-tenancy). |
-| **Nhân viên** | `Employee` | Nhân sự thuộc doanh nghiệp, quản lý trong module HRM. |
-| **Đơn vị tổ chức** | `OrgUnit` | Phòng ban, chi nhánh hoặc tổ chức con cấu thành sơ đồ cây doanh nghiệp. |
-| **Phiếu thu / chi** | `Finote` | Chứng từ ghi nhận giao dịch dòng tiền (Financial Note) trong module Accounting. |
-| **Liên hệ / Khách hàng** | `Contact` | Người đại diện khách hàng của doanh nghiệp trong module CRM. |
-| **Cơ hội / Đầu mối** | `Lead` | Cơ hội bán hàng tiềm năng trong CRM. |
-| **Vai trò & Phân quyền** | `Rbac` | Vai trò và các quyền hạn tĩnh gán cho nhân viên hoặc người dùng. |
-| **Nhật ký thay đổi** | `AuditLog` | Nhật ký lưu vết thay đổi dữ liệu nghiệp vụ theo cơ chế Delta. |
+| Thuật ngữ tiếng Việt     | Định danh kỹ thuật | Mô tả & Ranh giới                                                               |
+| :----------------------- | :----------------- | :------------------------------------------------------------------------------ |
+| **Doanh nghiệp / Thuê**  | `Organization`     | Đơn vị thuê dịch vụ, ranh giới phân tách dữ liệu cao nhất (Multi-tenancy).      |
+| **Nhân viên**            | `Employee`         | Nhân sự thuộc doanh nghiệp, quản lý trong module HRM.                           |
+| **Đơn vị tổ chức**       | `OrgUnit`          | Phòng ban, chi nhánh hoặc tổ chức con cấu thành sơ đồ cây doanh nghiệp.         |
+| **Phiếu thu / chi**      | `Finote`           | Chứng từ ghi nhận giao dịch dòng tiền (Financial Note) trong module Accounting. |
+| **Liên hệ / Khách hàng** | `Contact`          | Người đại diện khách hàng của doanh nghiệp trong module CRM.                    |
+| **Cơ hội / Đầu mối**     | `Lead`             | Cơ hội bán hàng tiềm năng trong CRM.                                            |
+| **Vai trò & Phân quyền** | `Rbac`             | Vai trò và các quyền hạn tĩnh gán cho nhân viên hoặc người dùng.                |
+| **Nhật ký thay đổi**     | `AuditLog`         | Nhật ký lưu vết thay đổi dữ liệu nghiệp vụ theo cơ chế Delta.                   |
 
 ---
 
