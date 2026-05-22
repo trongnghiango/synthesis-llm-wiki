@@ -195,6 +195,30 @@
     "00_raw_docs/STAX/history/20260507_org_structure/03_walkthrough.md": {
       "line": 0,
       "ch": 0
+    },
+    "02_atomic_nodes/dom-accounting-finote.md": {
+      "line": 9,
+      "ch": 0
+    },
+    "0-Inbox/hb-auth-flow.md": {
+      "line": 0,
+      "ch": 0
+    },
+    "02_atomic_nodes/hb-tanstack-router-migration.md": {
+      "line": 10,
+      "ch": 0
+    },
+    "00_raw_docs.md": {
+      "line": 0,
+      "ch": 0
+    },
+    "02_atomic_nodes/hist-20260509-fix-accounting-integration.md": {
+      "line": 14,
+      "ch": 209
+    },
+    "0-Inbox/arch-tenant-isolation.md": {
+      "line": 0,
+      "ch": 0
     }
   }
 }
