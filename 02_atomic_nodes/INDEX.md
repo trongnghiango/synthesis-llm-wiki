@@ -8,6 +8,7 @@ Chào mừng bạn đến với Layer 3 - Hệ thống **Nốt nguyên tử (Ato
 
 | Nốt Nguyên Tử | Tóm tắt (1 dòng) | Phụ thuộc | Tags |
 | :--- | :--- | :--- | :--- |
+| [[arch-gdrive-multitenant-cleanup]] | Cơ chế cache cấu trúc thư mục Google Drive O(1) và chuẩn hóa tên file đa tenant qua IFileStoragePort. | *Tự động* | `#storage ` #google-drive ` #multi-tenancy ` #cache ` #performance` |
 | [[arch-google-drive-oauth2]] | Tái cấu trúc Google Drive Integration từ Service Account sang OAuth 2.0 qua REST API và Authorization Code Flow. | *Tự động* | `#infrastructure ` #oauth2 ` #google-drive ` #system-module` |
 | [[arch-audit-crm-accounting-20260509]] | Khắc phục lỗi trùng lặp định danh CRM và rò rỉ dữ liệu đa bên (multi-tenancy) trong module Kế toán. | *Tự động* | `#crm ` #accounting ` #tenant-isolation ` #identity-integrity ` #refactoring` |
 | [[arch-migrate-tanstack-router]] | Chuyển đổi từ wouter sang TanStack Router, nâng cấp Type-Safe Navigation, Router Guards và tối ưu hóa UI Org Chart | *Tự động* | `#routing ` #tanstack-router ` #react ` #layout ` #org-chart` |
@@ -28,7 +29,7 @@ Chào mừng bạn đến với Layer 3 - Hệ thống **Nốt nguyên tử (Ato
 | [[arch-system-api-refactoring]] | Tái cấu trúc SystemModule qua Lookup/Bootstrap Service và chuẩn hóa tương tác Backend-Driven UI qua ActionableDto. | *Tự động* | `#system-module ` #backend-driven-ui ` #actionable-dto ` #refactoring ` #crm-api` |
 | [[arch-modular-monolith-tiers]] | Phân loại module thành 3 Tiers tránh circular dependency. | *Không* | `#architecture` `#modular` |
 | [[arch-clean-boundaries]] | Ranh giới độc lập của 4 lớp Clean Architecture. | [[arch-modular-monolith-tiers]] | `#clean-arch` `#layers` |
-| [[arch-als-tenant-isolation]] | Tự động hóa cô lập tenant lọc CSDL thông qua ALS. | [[arch-clean-boundaries]] | `#multi-tenancy` `#als` |
+| [[arch-als-tenant-isolation]] | Cô lập Tenant tự động qua Async Local Storage (ALS) kết hợp phân giải động VisibilityContext. | [[arch-clean-boundaries]] | `#multi-tenancy` `#als` `#security` `#visibility-context` |
 | [[arch-als-transactions]] | Quản lý transactional boundary ngầm định qua ALS. | [[arch-als-tenant-isolation]] | `#transactions` `#als` |
 | [[arch-exception-handling]] | Luật xử lý và ném exception an toàn trong Clean Arch. | [[arch-clean-boundaries]] | `#exceptions` `#error` |
 
@@ -49,6 +50,8 @@ Chào mừng bạn đến với Layer 3 - Hệ thống **Nốt nguyên tử (Ato
 
 | Nốt Nguyên Tử | Tóm tắt (1 dòng) | Phụ thuộc | Tags |
 | :--- | :--- | :--- | :--- |
+| [[hb-company_rbac_seeder]] | Đồng bộ hóa nhân sự, định biên vị trí và kế thừa quyền RBAC qua CLI seeder với cơ chế Smart Upsert. | *Tự động* | `#seeder ` #rbac ` #employee-sync ` #metadata-jsonb ` #nestjs` |
+| [[hb-db-cli-seeder]] | Tích hợp CLI tool gieo dữ liệu mẫu (seeder) trực tiếp qua pg Pool & Commander, tối ưu hóa tốc độ và an toàn unique constraint. | *Tự động* | `#cli ` #seeder ` #drizzle ` #pg-pool ` #developer-tooling` |
 | [[hb-stax-safe-update-pattern]] | Giải pháp Safe-Update tự động lọc bỏ các trường bất biến (id, audit, tenant) khi cập nhật dữ liệu để tránh lỗi ràng buộc Database. | *Tự động* | `#drizzle ` #repository ` #safe-update ` #database-constraint ` #refactoring` |
 | [[hb-stax-implementation-roadmap]] | Lộ trình 22 tuần chia thành 11 Sprints tối ưu hóa cho Solo-Developer triển khai hệ thống STAX (HRM, CRM, Finote, Task & Payroll) sử dụng Drizzle ORM và PostgreSQL. | *Tự động* | `#roadmap ` #project-management ` #sprint ` #solo-dev ` #tech-stack` |
 | [[hb-tanstack-router-migration]] | Hướng dẫn chuyển đổi hệ thống routing sang TanStack Router, áp dụng Route Guard và tối ưu giao diện full-screen cho OrgChart. | *Tự động* | `#tanstack-router ` #routing ` #layout ` #orgchart ` #ux-optimization` |
@@ -65,6 +68,7 @@ Chào mừng bạn đến với Layer 3 - Hệ thống **Nốt nguyên tử (Ato
 
 | Nốt Nguyên Tử | Tóm tắt (1 dòng) | Phụ thuộc | Tags |
 | :--- | :--- | :--- | :--- |
+| [[dom-company-rbac-seeder-upgrade]] | Nâng cấp cơ chế seeding cây phòng ban đa tầng, thuật toán fuzzy matching đồng bộ nhân sự và tự động hóa tài khoản RBAC bảo toàn bảo mật. | *Tự động* | `#seeder ` #rbac ` #tenant-isolation ` #fuzzy-matching ` #organization-tree` |
 | [[dom-dynamic_pricing]] | Cấu trúc biểu phí động (pricingModel, pricingConfig) trong luồng Lead-to-Contract và liên kết tự động tạo Finote đặt cọc. | *Tự động* | `#crm ` #dynamic-pricing ` #db-schema ` #lead-to-contract` |
 | [[dom-standardize-accounting-party]] | Chuẩn hóa thông tin Đối tượng Kế toán (Party) trực tiếp trong finotes phục vụ cách ly Tenant và hiển thị tối ưu không cần JOIN. | *Tự động* | `#accounting ` #database-schema ` #domain-entity ` #tenant-isolation` |
 | [[dom-crm-kanban-reports-fe]] | Thiết kế và giải pháp kỹ thuật frontend cho Kanban Board kéo thả và Dashboard báo cáo CRM. | *Tự động* | `#frontend ` #crm ` #kanban ` #dashboard ` #react-query ` #drag-drop` |

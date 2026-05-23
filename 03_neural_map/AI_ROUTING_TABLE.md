@@ -15,6 +15,8 @@ Khi bạn nhận được yêu cầu từ lập trình viên, hãy ánh xạ m�
     *   `[[arch-clean-boundaries]]` — Đường dẫn: [02_atomic_nodes/arch-clean-boundaries.md](../02_atomic_nodes/arch-clean-boundaries.md)
     *   `[[std-naming-rules]]` — Đường dẫn: [02_atomic_nodes/std-naming-rules.md](../02_atomic_nodes/std-naming-rules.md)
     *   `[[std-import-boundaries]]` — Đường dẫn: [02_atomic_nodes/std-import-boundaries.md](../02_atomic_nodes/std-import-boundaries.md)
+    *   `[[arch-gdrive-multitenant-cleanup]]` — Đường dẫn: [02_atomic_nodes/arch-gdrive-multitenant-cleanup.md](../02_atomic_nodes/arch-gdrive-multitenant-cleanup.md)
+
 
 ### 💾 2. Làm việc với Cơ sở dữ liệu & Giao dịch (Database & Transactions)
 *   *Mục tiêu:* Tạo bảng schema mới, viết Drizzle query, kiểm soát transaction chéo, hoặc filter theo Tenant.
@@ -22,6 +24,8 @@ Khi bạn nhận được yêu cầu từ lập trình viên, hãy ánh xạ m�
     *   `[[arch-als-tenant-isolation]]` — Đường dẫn: [02_atomic_nodes/arch-als-tenant-isolation.md](../02_atomic_nodes/arch-als-tenant-isolation.md)
     *   `[[arch-als-transactions]]` — Đường dẫn: [02_atomic_nodes/arch-als-transactions.md](../02_atomic_nodes/arch-als-transactions.md)
     *   `[[hb-drizzle-base-repo]]` — Đường dẫn: [02_atomic_nodes/hb-drizzle-base-repo.md](../02_atomic_nodes/hb-drizzle-base-repo.md)
+    *   `[[hb-db-cli-seeder]]` — Đường dẫn: [02_atomic_nodes/hb-db-cli-seeder.md](../02_atomic_nodes/hb-db-cli-seeder.md)
+
 
 ### 🔐 3. Xác thực, Phân quyền & Request Flow
 *   *Mục tiêu:* Kiểm tra quyền API, cấu hình RBAC, bẫy Exception, hoặc điều khiển Request Flow.
@@ -29,6 +33,8 @@ Khi bạn nhận được yêu cầu từ lập trình viên, hãy ánh xạ m�
     *   `[[arch-exception-handling]]` — Đường dẫn: [02_atomic_nodes/arch-exception-handling.md](../02_atomic_nodes/arch-exception-handling.md)
     *   `[[hb-rbac-permissions]]` — Đường dẫn: [02_atomic_nodes/hb-rbac-permissions.md](../02_atomic_nodes/hb-rbac-permissions.md)
     *   `[[hb-http-request-flow]]` — Đường dẫn: [02_atomic_nodes/hb-http-request-flow.md](../02_atomic_nodes/hb-http-request-flow.md)
+    *   `[[hb-company_rbac_seeder]]` — Đường dẫn: [02_atomic_nodes/hb-company_rbac_seeder.md](../02_atomic_nodes/hb-company_rbac_seeder.md)
+
 
 ### 📜 4. Logging & Kiểm toán nghiệp vụ (Audit Logging)
 *   *Mục tiêu:* Ghi log thay đổi dữ liệu nghiệp vụ, tính toán Delta Diff.
@@ -41,6 +47,8 @@ Khi bạn nhận được yêu cầu từ lập trình viên, hãy ánh xạ m�
     *   `[[dom-hrm-position-model]]` — Đường dẫn: [02_atomic_nodes/dom-hrm-position-model.md](../02_atomic_nodes/dom-hrm-position-model.md)
     *   `[[dom-accounting-finote]]` — Đường dẫn: [02_atomic_nodes/dom-accounting-finote.md](../02_atomic_nodes/dom-accounting-finote.md)
     *   `[[dom-crm-pipelines]]` — Đường dẫn: [02_atomic_nodes/dom-crm-pipelines.md](../02_atomic_nodes/dom-crm-pipelines.md)
+    *   `[[dom-company-rbac-seeder-upgrade]]` — Đường dẫn: [02_atomic_nodes/dom-company-rbac-seeder-upgrade.md](../02_atomic_nodes/dom-company-rbac-seeder-upgrade.md)
+
 
 ### 🤝 6. Giao tiếp Backend ↔ Frontend
 *   *Mục tiêu:* Viết Zod Schema, DTO dùng chung hoặc thiết kế API contract.

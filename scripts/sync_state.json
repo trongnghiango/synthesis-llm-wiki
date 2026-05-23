@@ -54,5 +54,9 @@
   "standardize_accounting_party": "62b5b0e08e2720884f8583fa194e97387dee729b7a797e58c13132c82e0b4231",
   "architecture_audit_crm_accounting": "e227cdb4255ddd1b97515675a7a74ca64a222ea7235240213303c575049b008b",
   "google_oauth2_drive": "c290454c333960c3178eff354f80dd6baa78a443e28acf571323c19f22ca461c",
-  "dynamic_pricing": "8dc2444bc3bcce9df65f97243244cc7ab942004e034a8ee8e726e3048ca6c687"
+  "dynamic_pricing": "8dc2444bc3bcce9df65f97243244cc7ab942004e034a8ee8e726e3048ca6c687",
+  "db_cli_seeder": "d64492e95c7300b826bbdfbbe23cbf6f35260b151b417d7db3ce1f5451ffccfa",
+  "company_rbac_seeder": "88519c398488cb0d2f5349d92286a9f9a1f2c938598dc2c45c9eb4b2eb6affcd",
+  "company_rbac_seeder_upgrade": "161169e78eb31122f3e57867cc2dfde8219e1828cf64f1775bd338affd421e7c",
+  "google_drive_multitenant_cleanup": "5ef4e4145183e916be730139345a811ab0618527abc3b3a9959b7384e9f2b09b"
 }

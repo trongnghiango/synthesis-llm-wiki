@@ -170,7 +170,10 @@ def find_new_feature_sessions():
     that are new or have been updated based on their MD5 hash state in sync_state.json.
     """
     print("\n--- Bước 2: Phát hiện các phiên làm việc (Features) mới hoặc thay đổi ---")
-    history_dir = os.path.join(RAW_DOCS_DIR, "STAX", "history")
+    history_dirs = [
+        os.path.join(RAW_DOCS_DIR, "STAX", "history"),
+        os.path.join(RAW_DOCS_DIR, "history")
+    ]
     context_dir = os.path.join(RAW_DOCS_DIR, "context")
 
     sessions = []
@@ -236,20 +239,21 @@ def find_new_feature_sessions():
         return False, folder_hash
 
     # Scan history
-    if os.path.exists(history_dir):
-        for entry in os.listdir(history_dir):
-            entry_path = os.path.join(history_dir, entry)
-            if os.path.isdir(entry_path) and "_" in entry:
-                slug = entry.split("_", 1)[1]
-                is_proc, f_hash = is_session_processed(slug, entry_path)
-                if not is_proc:
-                    sessions.append({
-                        "name": entry,
-                        "slug": slug,
-                        "path": entry_path,
-                        "type": "history",
-                        "hash": f_hash
-                    })
+    for history_dir in history_dirs:
+        if os.path.exists(history_dir):
+            for entry in os.listdir(history_dir):
+                entry_path = os.path.join(history_dir, entry)
+                if os.path.isdir(entry_path) and "_" in entry:
+                    slug = entry.split("_", 1)[1]
+                    is_proc, f_hash = is_session_processed(slug, entry_path)
+                    if not is_proc:
+                        sessions.append({
+                            "name": entry,
+                            "slug": slug,
+                            "path": entry_path,
+                            "type": "history",
+                            "hash": f_hash
+                        })
 
     # Scan active context
     if os.path.exists(context_dir):
@@ -448,19 +452,19 @@ def update_routing_table_and_index(note_id, note_content):
             if f"[[{note_id}]]" not in routing_content:
                 # Find appropriate section
                 sections = {
-                    "01_core_architecture": "### 1. Thiết kế Module mới, Tổ chức Folder & Import",
-                    "02_standards_governance": "### 1. Thiết kế Module mới, Tổ chức Folder & Import",
-                    "03_technical_handbooks": "### 3. Xác thực, Phân quyền & Request Flow",
-                    "04_domain_knowledge": "### 5. Xử lý logic Nghiệp vụ Core (HRM / CRM / Accounting)"
+                    "01_core_architecture": "### 🏗️ 1. Thiết kế Module mới, Tổ chức Folder & Import",
+                    "02_standards_governance": "### 🏗️ 1. Thiết kế Module mới, Tổ chức Folder & Import",
+                    "03_technical_handbooks": "### 🔐 3. Xác thực, Phân quyền & Request Flow",
+                    "04_domain_knowledge": "### 📦 5. Xử lý logic Nghiệp vụ Core (HRM / CRM / Accounting)"
                 }
 
                 # Handle database specific routing
                 if any(x in tags for x in ["database", "drizzle", "transactions", "als"]):
-                    target_sec = "### 2. Làm việc với Cơ sở dữ liệu & Giao dịch (Database & Transactions)"
+                    target_sec = "### 💾 2. Làm việc với Cơ sở dữ liệu & Giao dịch (Database & Transactions)"
                 elif any(x in tags for x in ["logging", "delta-logging", "audit-log"]):
-                    target_sec = "### 4. Logging & Kiểm toán nghiệp vụ (Audit Logging)"
+                    target_sec = "### 📜 4. Logging & Kiểm toán nghiệp vụ (Audit Logging)"
                 else:
-                    target_sec = sections.get(parent_clean, "### 5. Xử lý logic Nghiệp vụ Core (HRM / CRM / Accounting)")
+                    target_sec = sections.get(parent_clean, "### 📦 5. Xử lý logic Nghiệp vụ Core (HRM / CRM / Accounting)")
 
                 new_route = f"    *   `[[{note_id}]]` — Đường dẫn: [02_atomic_nodes/{note_id}.md](../02_atomic_nodes/{note_id}.md)\n"
 
@@ -490,6 +494,7 @@ def main():
     # 0. Parse arguments
     parser = argparse.ArgumentParser(description="Đồng bộ tri thức STAX tự động.")
     parser.add_argument("--skip-ai", type=str, help="Danh sách các slug bỏ qua AI (e.g. crm_analytics_service,all)")
+    parser.add_argument("--yes", "-y", action="store_true", help="Tự động đồng bộ tất cả chuyên đề không cần hỏi")
     args = parser.parse_known_args()[0]
 
     # 1. Sync raw files
@@ -535,7 +540,7 @@ def main():
         should_skip_ai = skip_all or (session["slug"] in skip_ai_sessions)
 
         # Ask user interactively if not explicitly skipped
-        if not should_skip_ai:
+        if not should_skip_ai and not args.yes:
             try:
                 user_input = input(f"\n[?] Phát hiện thay đổi tại {session['slug']}. Bạn có muốn gọi AI để cập nhật lại nốt nguyên tử? (y/N): ")
                 if user_input.strip().lower() not in ["y", "yes"]:

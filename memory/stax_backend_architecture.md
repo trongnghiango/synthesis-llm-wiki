@@ -199,4 +199,8 @@ export class AuthModule {}
 ## 4. Key Lessons & Failure Prevention
 - **Unit of Work Transactions:** Always coordinate writes using `ITransactionManager` in the application layer. Keep events and audit logs non-blocking and dispatch them after transaction commits.
 - **Drizzle Safety:** Use Drizzle schema constants like `sessions` through global mappings (`@database/schema`) rather than direct file imports to prevent circular dependencies.
-- **Tenant Scope Enforcement:** In multi-tenant scopes, repository functions MUST check for `organizationId` from the context or parameters.
+- **Dynamic Multi-Tenancy Isolation:** Bảng `sessions` và thực thể `Session` vật lý cố tình **không** lưu `organizationId`. Việc cô lập Tenant động được giải quyết tối giản và tinh tế bằng:
+  1. Khi Đăng nhập: `IVisibilityResolverService` tính toán ngữ cảnh dữ liệu (`VisibilityContext`) dựa trên vai trò của User, nhúng nó làm `visibilityContext` vào **JWT Payload**.
+  2. Mỗi Request: `JwtStrategy` giải mã JWT Payload, đẩy trực tiếp `VisibilityContext` vào **AsyncLocalStorage (ALS)** thông qua `RequestContextService`.
+  3. Tầng Persistence: `DrizzleBaseRepository.applyTenantIsolation()` tự động lấy `VisibilityContext` từ ALS để áp dụng mệnh đề điều kiện `where` cho các truy vấn có trường `organizationId`, `tenantId`, hoặc bảng `organizations` tự thân (`table.id`) mà không cần truyền thủ công.
+- **Tenant Scope Enforcement:** In multi-tenant scopes, repository functions MUST check for `organizationId` or `tenantId` from the context or parameters via `applyTenantIsolation(conditions, table)`. Bảng `organizations` được lọc an toàn dựa trên chính khóa `id` của nó khi phát hiện `'organizationName' in table`. Bảng `finotes` được cô lập bằng cột `tenantId` khi phát hiện `'tenantId' in table`.

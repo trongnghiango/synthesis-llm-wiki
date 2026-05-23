@@ -63,7 +63,7 @@ When processing raw requirements or business documents (`inbox-note` status: `to
 ---
 
 ## 🛠️ Specialized Agent Skills Orchestration
-You have access to 8 custom agentic technical skills located inside `.agent/`. When working with the user in chat, you must dynamically orchestrate these workflows based on the request:
+You have access to 9 custom agentic technical skills located inside `.agent/`. When working with the user in chat, you must dynamically orchestrate these workflows based on the request:
 
 1.  **Brainstorming & Designing:** Trigger `@stax-think` (or `@stax-mindstorm` / `ka-think`) for architectural review, trade-offs, and Socratic questioning. **Strict rule: No production code or file edits are allowed during this stage.** Maintain the "Understanding Lock" gate before presenting approach options.
 2.  **Full Feature Coding:** Trigger `@stax-backend` when implementing a new module or complex backend logic. Enforce the strict 4-step workflow:
@@ -73,6 +73,7 @@ You have access to 8 custom agentic technical skills located inside `.agent/`. W
     *   Step 4: Implementation & Handoff Walkthrough (`03_be_walkthrough.md`).
 3.  **Naming & Standard Auditing:** Trigger `@stax-naming-auditor` to perform a read-only audit on properties, enums, DB casing, and schemas. Generate a `02_fix_manifest.md` to hand off to development.
 4.  **Micro-fixes & Hot patches:** Trigger `@stax-quick-task` for small bug fixes or auditor manifest implementation that affect **3 files or fewer** and don't modify DB schemas. Ensure changes are logged in `docs/STAX/06_CHANGELOG.md`.
+5.  **STAX Knowledge Query & Ingestion:** Trigger `@stax-knowledge-expert` to answer domain or technical questions. Prioritize Layer 3 notes and `AI_ROUTING_TABLE.md`, fallback to external references with label `[Tham khảo ngoài]`, and request confirmation to synchronize/siphon new knowledge.
 
 ---
 
@@ -176,3 +177,9 @@ When requested to perform synchronization, processing, or synthesis of raw docum
 *   **Step 2 (Step-by-step Prompt):** Ask the user interactively, folder by folder: "Phát hiện thay đổi tại chuyên đề [{slug}]. Bạn có muốn đồng bộ (synthesis) tài liệu này không? (y/N)". Wait for user response for each file before proceeding to the next.
 *   **Step 3 (Final Gate):** Display a summary of all selected folders and ask for final confirmation: "Bạn có chắc chắn muốn tiến hành gọi API để synthesis danh sách các tài liệu trên không? (y/N)".
 *   **Step 4 (Execution):** Only execute the synthesis, write to `02_atomic_nodes/`, and update index/routing tables if the final confirmation is yes. Otherwise, do NOT call the API or modify any files.
+
+### 8. STAX Knowledge Retrieval & Synthesis Protocol (Ưu tiên Tri thức Nội bộ & Xác thực Tương tác)
+When answering questions or discussing domain areas of STAX (HRM, CRM, Accounting, RBAC, Core Tiers):
+*   **Prioritize Local Knowledge:** Search `02_atomic_nodes/` and `03_neural_map/AI_ROUTING_TABLE.md` first. Answer strictly using local Layer 3 notes and reference them e.g. `[dom-accounting-finote.md](02_atomic_nodes/dom-accounting-finote.md)`.
+*   **External Reference Fallback:** If not found locally, state: *"Không tìm thấy tri thức này trong hệ thống STAX Wiki. Đang tìm hiểu và tham khảo bên ngoài..."*. You may fetch details from the STAX_ASP codebase or external industry standards, and explicitly label them with `[Tham khảo ngoài - External Reference]`.
+*   **Interactive Siphon Gate:** If you extract valuable new knowledge from external sources, trigger the interactive validation prompt: *"Tôi phát hiện tri thức về [{topic}] chưa có trong kho tri thức STAX Wiki. Bạn có muốn đồng bộ và tạo một nốt nguyên tử mới cho chuyên đề này không? (y/N)"*. Only write a new Layer 3 Atomic note to `02_atomic_nodes/` and update `INDEX.md` + `AI_ROUTING_TABLE.md` if the user confirms with "y" or "yes".
