@@ -29,6 +29,7 @@ Khi bạn nhận được yêu cầu từ lập trình viên, hãy ánh xạ m�
     *   `[[arch-als-transactions]]` — Đường dẫn: [02_atomic_nodes/arch-als-transactions.md](../02_atomic_nodes/arch-als-transactions.md)
     *   `[[hb-drizzle-base-repo]]` — Đường dẫn: [02_atomic_nodes/hb-drizzle-base-repo.md](../02_atomic_nodes/hb-drizzle-base-repo.md)
     *   `[[hb-db-cli-seeder]]` — Đường dẫn: [02_atomic_nodes/hb-db-cli-seeder.md](../02_atomic_nodes/hb-db-cli-seeder.md)
+    *   `[[dom-schema-optimization]]` — Đường dẫn: [02_atomic_nodes/dom-schema-optimization.md](../02_atomic_nodes/dom-schema-optimization.md) — Tối ưu naming convention, composite indexes, unified attachments và multi-tenant seeder fix.
 
 
 ### 🔐 3. Xác thực, Phân quyền & Request Flow

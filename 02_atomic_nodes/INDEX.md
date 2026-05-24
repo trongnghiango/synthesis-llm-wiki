@@ -133,6 +133,7 @@ Chào mừng bạn đến với Layer 3 - Hệ thống **Nốt nguyên tử (Ato
 | [[dom-hrm-position-model]] | Triết lý quản lý nhân sự dựa trên Vị trí (Position-based). | *Không* | `#domain` `#hrm` `#position` |
 | [[dom-accounting-finote]] | Luồng chứng từ phiếu thu/chi và đồng bộ số dư Sổ quỹ. | *Không* | `#domain` `#accounting` `#finote` |
 | [[dom-crm-pipelines]] | Quản lý cơ hội qua Kanban và tự động chuyển đổi sang Org. | *Không* | `#domain` `#crm` `#leads` |
+| [[dom-schema-optimization]] | Đợt tối ưu schema tổng thể: naming convention, composite indexes, unified attachments, lead assignment B+, employee_tasks và multi-tenant seeder fix. | *Tự động* | `#database ` #schema ` #optimization ` #multi-tenancy ` #performance` |
 
 ---
 *Mạng lưới liên kết chéo chằng chịt giúp AI duyệt đồ thị tri thức cực kỳ linh hoạt.*

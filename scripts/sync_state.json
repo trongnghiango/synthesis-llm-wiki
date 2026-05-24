@@ -60,5 +60,6 @@
   "company_rbac_seeder_upgrade": "161169e78eb31122f3e57867cc2dfde8219e1828cf64f1775bd338affd421e7c",
   "google_drive_multitenant_cleanup": "5ef4e4145183e916be730139345a811ab0618527abc3b3a9959b7384e9f2b09b",
   "tenant_isolation_casing_fix": "79cf3b8e0b646fccfee411065d35691afffa3aca24d7c53dfa7b73468e5ee1af",
-  "crm_accounting_tenant_isolation_fix": "80c51134893a3cb6177c4e3883c0a2bb2cbe6cc059cd2dd21df04621bf9a8d54"
+  "crm_accounting_tenant_isolation_fix": "80c51134893a3cb6177c4e3883c0a2bb2cbe6cc059cd2dd21df04621bf9a8d54",
+  "schema_optimization": "8a238c0c889d29f90552438aa9704d0335240d2a1796677d558b107014395e97"
 }
