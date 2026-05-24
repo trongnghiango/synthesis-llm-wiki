@@ -8,6 +8,8 @@ Chào mừng bạn đến với Layer 3 - Hệ thống **Nốt nguyên tử (Ato
 
 | Nốt Nguyên Tử | Tóm tắt (1 dòng) | Phụ thuộc | Tags |
 | :--- | :--- | :--- | :--- |
+| [[arch-tenant-isolation-fix]] | Nâng cấp applyTenantIsolation trong Drizzle Base Repository nhằm tự động hóa việc cô lập dữ liệu theo tổ chức cho các module CRM, HRM, Accounting và System. | *Tự động* | `#tenant-isolation ` #drizzle-orm ` #multi-tenancy ` #repository-pattern` |
+| [[arch-tenant-isolation-casing-fix]] | Chuẩn hóa so sánh role bằng toUpperCase, loại bỏ fallback tenant ID nguy hiểm tại CRM Controllers và tích hợp applyTenantIsolation tự động. | *Tự động* | `#security ` #tenant-isolation ` #authorization ` #drizzle-orm ` #crm` |
 | [[arch-gdrive-multitenant-cleanup]] | Cơ chế cache cấu trúc thư mục Google Drive O(1) và chuẩn hóa tên file đa tenant qua IFileStoragePort. | *Tự động* | `#storage ` #google-drive ` #multi-tenancy ` #cache ` #performance` |
 | [[arch-google-drive-oauth2]] | Tái cấu trúc Google Drive Integration từ Service Account sang OAuth 2.0 qua REST API và Authorization Code Flow. | *Tự động* | `#infrastructure ` #oauth2 ` #google-drive ` #system-module` |
 | [[arch-audit-crm-accounting-20260509]] | Khắc phục lỗi trùng lặp định danh CRM và rò rỉ dữ liệu đa bên (multi-tenancy) trong module Kế toán. | *Tự động* | `#crm ` #accounting ` #tenant-isolation ` #identity-integrity ` #refactoring` |

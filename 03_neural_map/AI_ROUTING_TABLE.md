@@ -16,6 +16,10 @@ Khi bạn nhận được yêu cầu từ lập trình viên, hãy ánh xạ m�
     *   `[[std-naming-rules]]` — Đường dẫn: [02_atomic_nodes/std-naming-rules.md](../02_atomic_nodes/std-naming-rules.md)
     *   `[[std-import-boundaries]]` — Đường dẫn: [02_atomic_nodes/std-import-boundaries.md](../02_atomic_nodes/std-import-boundaries.md)
     *   `[[arch-gdrive-multitenant-cleanup]]` — Đường dẫn: [02_atomic_nodes/arch-gdrive-multitenant-cleanup.md](../02_atomic_nodes/arch-gdrive-multitenant-cleanup.md)
+    *   `[[arch-tenant-isolation-casing-fix]]` — Đường dẫn: [02_atomic_nodes/arch-tenant-isolation-casing-fix.md](../02_atomic_nodes/arch-tenant-isolation-casing-fix.md)
+    *   `[[arch-tenant-isolation-fix]]` — Đường dẫn: [02_atomic_nodes/arch-tenant-isolation-fix.md](../02_atomic_nodes/arch-tenant-isolation-fix.md)
+
+
 
 
 ### 💾 2. Làm việc với Cơ sở dữ liệu & Giao dịch (Database & Transactions)

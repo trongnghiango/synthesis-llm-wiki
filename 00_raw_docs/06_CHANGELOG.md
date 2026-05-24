@@ -1,3 +1,15 @@
+### [2026-05-23] - Chuẩn hóa Bảo mật Đa thuê (Tenant Isolation) & Khắc phục Lỗi Casing Role
+- **Module:** `user`, `crm`, `accounting`, `hrm`, `system`
+- **Loại:** `Auditor-Fix`
+- **Thay đổi:**
+  - Khắc phục lỗi so sánh casing vai trò người dùng trong `VisibilityResolverService`.
+  - Loại bỏ fallback `|| 1` không an toàn ở các CRM Controllers, siết chặt kiểm tra và ném `ForbiddenException` cho các tài khoản ngoài thiếu `organizationId`.
+  - Nâng cấp `applyTenantIsolation` ở lớp cha `DrizzleBaseRepository` để hỗ trợ lọc tự động cả bảng Organizations (`table.id`), bảng Finotes (`table.tenantId`), và các bảng dữ liệu con khác (`table.organizationId`).
+  - CRM Module: Tích hợp `applyTenantIsolation` vào các hàm query của `DrizzleOrganizationRepository`, `DrizzleLeadRepository`, `DrizzleQuoteRepository`, `DrizzleContactRepository`, và `DrizzleServiceAssignmentRepository`.
+  - HRM/Employee Module: Tích hợp `applyTenantIsolation` vào các truy vấn trong `DrizzleEmployeeRepository`, `DrizzleEmployeeTaskRepository`, và `DrizzleOrgStructureRepository` (bao gồm locations, grades, jobTitles, orgUnits, positions).
+  - Accounting Module: Tích hợp `applyTenantIsolation` vào các truy vấn trong `DrizzleFinoteRepository`, `DrizzleCashFundRepository`, `DrizzleAccountRepository`, `DrizzleJournalRepository`, và `DrizzleFinotePaymentRepository`.
+  - System Module: Tích hợp `applyTenantIsolation` vào các truy vấn trong `DrizzleAttachmentRepository`.
+  - Xác thực thành công: Backend build thành công không lỗi TypeScript, tất cả 234 test cases đều vượt qua hoàn hảo.
 # STAX V2 Changelog
 
 Lưu trữ lịch sử các thay đổi nhỏ, sửa lỗi, và micro-features trong hệ thống STAX.
