@@ -259,6 +259,18 @@
     "02_atomic_nodes/arch-als-tenant-isolation.md": {
       "line": 10,
       "ch": 0
+    },
+    "3-Distilled/202605211630-agent-interactive-synthesis-prompt.md": {
+      "line": 11,
+      "ch": 0
+    },
+    "3-Distilled/202605211625-token-optimization-report.md": {
+      "line": 11,
+      "ch": 0
+    },
+    "scripts/README.md": {
+      "line": 0,
+      "ch": 0
     }
   }
 }
