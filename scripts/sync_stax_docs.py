@@ -137,11 +137,17 @@ def copy_raw_docs():
 
 def calculate_folder_hash(folder_path):
     """
-    Calculates a SHA-256 hash representing the contents of all markdown files in the folder.
-    This serves as a fingerprint to detect any updates to the files.
+    Calculates a SHA-256 hash representing the contents of all files in the folder.
+    This serves as a fingerprint to detect any updates to the files (markdown, CSV,
+    images, PDFs, config files, etc.).
     """
     if not os.path.exists(folder_path):
         return ""
+
+    # File extensions to include in hashing (covers all common doc types)
+    INCLUDE_EXTENSIONS = {".md", ".csv", ".json", ".yaml", ".yml", ".png", ".jpg",
+                          ".jpeg", ".gif", ".svg", ".pdf", ".docx", ".xlsx", ".txt",
+                          ".env", ".toml", ".ini", ".cfg"}
 
     hash_obj = hashlib.sha256()
     has_files = False
@@ -149,16 +155,24 @@ def calculate_folder_hash(folder_path):
     try:
         # Sort files to ensure deterministic hashing
         for file in sorted(os.listdir(folder_path)):
-            if file.endswith(".md"):
-                file_path = os.path.join(folder_path, file)
-                if os.path.isfile(file_path):
-                    has_files = True
-                    # Update with filename and its modification time/size to be fast and secure
-                    hash_obj.update(file.encode('utf-8'))
-                    hash_obj.update(str(os.path.getsize(file_path)).encode('utf-8'))
-                    # Read and hash content
-                    with open(file_path, 'rb') as f:
-                        hash_obj.update(f.read())
+            ext = os.path.splitext(file)[1].lower()
+            if ext not in INCLUDE_EXTENSIONS:
+                continue
+
+            file_path = os.path.join(folder_path, file)
+            if not os.path.isfile(file_path):
+                continue
+
+            try:
+                has_files = True
+                # Update with filename and size to detect renames and content changes
+                hash_obj.update(file.encode('utf-8'))
+                hash_obj.update(str(os.path.getsize(file_path)).encode('utf-8'))
+                # Read and hash content
+                with open(file_path, 'rb') as f:
+                    hash_obj.update(f.read())
+            except (IOError, OSError) as e:
+                print(f"Warning: could not read {file}: {e}", file=sys.stderr)
     except Exception as e:
         print(f"Error calculating hash for {folder_path}: {e}", file=sys.stderr)
 
