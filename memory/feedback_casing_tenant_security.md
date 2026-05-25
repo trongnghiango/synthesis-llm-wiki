@@ -1,8 +1,11 @@
 ---
-name: feedback-casing-tenant-security
-description: Ràng buộc kiểm tra hoa/thường cho Roles, loại bỏ fallback organizationId || 1 không an toàn và tích hợp applyTenantIsolation tự động ở tầng Repository.
+description: Ràng buộc kiểm tra hoa/thường cho Roles, loại bỏ fallback organizationId
+  || 1 không an toàn và tích hợp applyTenantIsolation tự động ở tầng Repository.
 metadata:
   type: feedback
+name: feedback-casing-tenant-security
+synced_at: '2026-05-25 13:23:24'
+synced_to_claudemd: true
 ---
 
 Khi phát triển hoặc rà soát tính năng trên Backend NestJS của dự án STAX:

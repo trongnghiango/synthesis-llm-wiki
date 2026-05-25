@@ -1,10 +1,13 @@
 ---
-name: feedback-stax-knowledge-first
-description: "Bắt buộc tra cứu tri thức nội bộ STAX trước, dùng nhãn [Tham khảo ngoài] cho tri thức ngoại vi và Cổng Xác thực trước khi cập nhật tri thức mới."
-metadata: 
+description: Bắt buộc tra cứu tri thức nội bộ STAX trước, dùng nhãn [Tham khảo ngoài]
+  cho tri thức ngoại vi và Cổng Xác thực trước khi cập nhật tri thức mới.
+metadata:
   node_type: memory
-  type: feedback
   originSessionId: 00325e94-edb8-4e30-9739-1d94947692ee
+  type: feedback
+name: feedback-stax-knowledge-first
+synced_at: '2026-05-25 13:23:24'
+synced_to_claudemd: true
 ---
 
 Khi trả lời hoặc thảo luận về bất kỳ khía cạnh kỹ thuật hay nghiệp vụ nào của STAX (HRM, CRM, Kế toán, RBAC):

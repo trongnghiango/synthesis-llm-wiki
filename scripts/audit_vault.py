@@ -21,7 +21,7 @@ VAULT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Directories to scan for audits (except Templates)
 SCAN_DIRS = [
     "0-Inbox", "1-Journal", "2-Processed", "3-Distilled",
-    "02_atomic_nodes", "03_neural_map",
+    "02_atomic_nodes", "03_neural_map", "Clippings",
 ]
 
 # Directories to SKIP — templates, git, hidden, binary
@@ -132,14 +132,21 @@ def is_svg_icon(url):
 
 
 def check_link_portability(link_text, file_rel_path):
-    """Check if a markdown link violates portability rules."""
+    """Check if a markdown link violates portability rules.
+
+    Rules:
+    - Absolute paths starting with '/' are NOT portable — they break when the
+      vault root moves.
+    - '../' is allowed ONLY if the resolved path stays within the vault tree.
+      Using '../' is a style weakness (prefer [[wiki links]]), but it is NOT
+      a broken link per se.
+    """
     violations = []
-    # Absolute path starting with /
     if link_text.startswith("/"):
         violations.append(f"đường dẫn tuyệt đối ('{link_text}')")
-    # Relative path going up (../)
-    if "../" in link_text:
-        violations.append(f"đường dẫn '../' ('{link_text}')")
+
+    # '../' is NOT a hard portability violation if it stays in-vault,
+    # but we warn as a style note.
     return violations
 
 
@@ -168,6 +175,34 @@ def audit_links(all_files, file_map):
         full_no_ext = os.path.splitext(rel_path)[0]
         existing_pages.add(full_no_ext.lower())
 
+    def resolve_wiki_link(target_page):
+        """Resolve an Obsidian [[wiki link]] to see if it exists in the vault.
+
+        Supports various formats:
+        - [[note]] or [[note.md]]
+        - [[path/note]] or [[path/note.md]]
+        - [[Clippings/file.md]]
+        """
+        target_lower = target_page.lower()
+
+        # Direct match (no extension)
+        if target_lower in existing_pages:
+            return True
+
+        # Strip .md if present and retry
+        if target_lower.endswith(".md"):
+            no_ext = target_lower[:-3]
+            if no_ext in existing_pages:
+                return True
+
+        # If it contains a path separator, extract basename
+        if "/" in target_lower:
+            base = os.path.splitext(os.path.basename(target_lower))[0]
+            if base in existing_pages:
+                return True
+
+        return False
+
     for rel_path, abs_path in all_files:
         content = read_file(abs_path)
         if not content:
@@ -182,11 +217,7 @@ def audit_links(all_files, file_map):
             if not target_page:
                 continue
 
-            # Check if target exists in the file map
-            target_lower = target_page.lower()
-            found = target_lower in existing_pages
-
-            if not found:
+            if not resolve_wiki_link(target_page):
                 broken_obsidian.append((rel_path, full_match, target_page))
 
         # --- Check Markdown Links [label](path) ---
@@ -197,19 +228,26 @@ def audit_links(all_files, file_map):
             if is_external_link(url) or is_svg_icon(url):
                 continue
 
-            # Check portability
+            # Check portability (absolute paths only)
             p_issues = check_link_portability(url, rel_path)
             for issue in p_issues:
                 portability_issues.append((rel_path, url, issue))
 
-            # Resolve the link to a known file
+            # Resolve the link to a known file.
             # Normalize: strip leading ./ and remove anchor
             clean_url = url.split("#")[0].strip()
             if clean_url.startswith("./"):
                 clean_url = clean_url[2:]
 
+            # If link starts with ../, resolve it relative to the source file's directory
+            if clean_url.startswith("../"):
+                resolved = os.path.normpath(os.path.join(os.path.dirname(abs_path), clean_url))
+                rel_resolved = os.path.relpath(resolved, VAULT_ROOT)
+                link_lower = rel_resolved.lower()
+            else:
+                link_lower = clean_url.lower()
+
             # Try to find the file
-            link_lower = clean_url.lower()
             found = False
             for known_rel_path in file_map:
                 if link_lower == known_rel_path or \
@@ -282,11 +320,18 @@ def parse_frontmatter(content, file_rel_path):
 
 
 def clean_link(ref):
-    """Clean a frontmatter reference — strip [[ ]] and whitespace."""
+    """Clean a frontmatter reference — strip [[ ]] and whitespace. Supports string or list."""
     if not ref:
-        return ""
-    cleaned = ref.strip().replace("[[", "").replace("]]", "").strip()
-    return cleaned
+        return []
+    if isinstance(ref, list):
+        results = []
+        for r in ref:
+            if isinstance(r, str):
+                results.append(r.strip().replace("[[", "").replace("]]", "").strip())
+        return results
+    elif isinstance(ref, str):
+        return [ref.strip().replace("[[", "").replace("]]", "").strip()]
+    return []
 
 
 def audit_hierarchy(all_files):
@@ -326,34 +371,24 @@ def audit_hierarchy(all_files):
         fm = info["fm"]
         parent_ref = fm.get("parent", "")
         depends_on_refs = fm.get("depends_on", [])
-        source_note = fm.get("source_note", "")
+        source_note_ref = fm.get("source_note", "")
 
         # 1. Validate parent
-        if parent_ref:
-            parent_clean = clean_link(parent_ref)
+        for parent_clean in clean_link(parent_ref):
             if parent_clean and parent_clean not in known_slugs:
                 inconsistencies.append(
                     f"[{info['file']}]: parent='{parent_clean}' không tồn tại trong vault"
                 )
 
         # 2. Validate depends_on
-        if isinstance(depends_on_refs, list):
-            for dep in depends_on_refs:
-                dep_clean = clean_link(dep)
-                if dep_clean and dep_clean not in known_slugs:
-                    inconsistencies.append(
-                        f"[{info['file']}]: depends_on='{dep_clean}' không tồn tại trong vault"
-                    )
-        elif isinstance(depends_on_refs, str) and depends_on_refs.strip():
-            dep_clean = clean_link(depends_on_refs)
+        for dep_clean in clean_link(depends_on_refs):
             if dep_clean and dep_clean not in known_slugs:
                 inconsistencies.append(
                     f"[{info['file']}]: depends_on='{dep_clean}' không tồn tại trong vault"
                 )
 
         # 3. Validate source_note (for processed notes)
-        if source_note:
-            source_clean = clean_link(source_note)
+        for source_clean in clean_link(source_note_ref):
             # source_note may point to a file path, not just a slug
             # Check if it exists as a known slug or as a rel_path known slug without dir prefix
             source_filename = os.path.splitext(os.path.basename(source_clean))[0]

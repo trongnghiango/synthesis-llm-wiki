@@ -45,6 +45,21 @@ Every domain module must enforce 3 distinct layers:
 
 ---
 
+
+*   **Ràng buộc kiểm tra hoa/thường cho Roles, loại bỏ fallback organizationId || 1 không an toàn và tích hợp applyTenantIsolation tự động ở tầng Repository.**
+    *   1. **Kiểm tra Casing cho Roles**: Role được lưu trữ trong CSDL và phân quyền luôn là CHỮ IN HOA (`ADMIN`, `SUPER_ADMIN`, `MANAGER`). Mọi điều kiện so sánh, bao gồm cả trong `VisibilityResolverService`, bắt buộc phải chuyển mảng `roles` về chữ in hoa (`toUpperCase()`) trước khi đối chiếu để tránh tê liệt phân quyền.
+    *   2. **Triệt tiêu Fallback `|| 1` tại Controllers**:
+    *   - Tuyệt đối KHÔNG sử dụng `user.organizationId || 1` cho người dùng bên ngoài (EXTERNAL) vì sẽ tự động gán họ vào Tổ chức `1` (Platform Owner - STAX), vi phạm bảo mật đa thuê.
+    *   - Nếu `organizationId` của người dùng bên ngoài bị thiếu, bắt buộc ném `ForbiddenException` ngay từ tầng Controller.
+    *   - Chỉ cho phép nhân sự nội bộ (`user.isInternal === true`) được phép fallback về `1` (thư mục hệ thống của STAX) đối với các tác vụ lưu trữ tệp tin.
+    *   3. **Kích hoạt `applyTenantIsolation` tự động**:
+    *   - Các Repository kế thừa `DrizzleBaseRepository` phải tích hợp `this.applyTenantIsolation(conditions, table)` vào mệnh đề `where` thay vì lọc `orgId > 1` thủ công.
+    *   - Cơ chế này sẽ tự động giải phóng bộ lọc nếu người dùng có `scope: 'ALL'` (Platform Owner), cho phép họ quản lý chéo khách hàng một cách an toàn.
+    *   - Khắc phục lỗ hổng phân quyền nghiêm trọng khóa chặt Admin khỏi hệ thống do so sánh lowercase role.
+    *   - Ngăn ngừa nguy cơ rò rỉ dữ liệu nhạy cảm của Platform Owner (STAX) cho người dùng bên ngoài thông qua fallback `|| 1` mặc định.
+    *   - Tự động hóa chốt chặn bảo mật đa thuê ở tầng dữ liệu thông qua AsyncLocalStorage (ALS), triệt tiêu rủi ro lập trình viên quên chèn điều kiện lọc thủ công.
+    *   - Áp dụng khi phân tích thiết kế hệ thống và rà soát code tại các module nghiệp vụ Tier 2 & Tier 3 (CRM, HRM, Kế toán).
+    *   *Nguồn: memory/feedback_casing_tenant_security.md*
 ## 📋 BA & Ubiquitous Language Protocol
 When processing raw requirements or business documents (`inbox-note` status: `to-process`):
 
@@ -183,3 +198,14 @@ When answering questions or discussing domain areas of STAX (HRM, CRM, Accountin
 *   **Prioritize Local Knowledge:** Search `02_atomic_nodes/` and `03_neural_map/AI_ROUTING_TABLE.md` first. Answer strictly using local Layer 3 notes and reference them e.g. `[dom-accounting-finote.md](02_atomic_nodes/dom-accounting-finote.md)`.
 *   **External Reference Fallback:** If not found locally, state: *"Không tìm thấy tri thức này trong hệ thống STAX Wiki. Đang tìm hiểu và tham khảo bên ngoài..."*. You may fetch details from the STAX_ASP codebase or external industry standards, and explicitly label them with `[Tham khảo ngoài - External Reference]`.
 *   **Interactive Siphon Gate:** If you extract valuable new knowledge from external sources, trigger the interactive validation prompt: *"Tôi phát hiện tri thức về [{topic}] chưa có trong kho tri thức STAX Wiki. Bạn có muốn đồng bộ và tạo một nốt nguyên tử mới cho chuyên đề này không? (y/N)"*. Only write a new Layer 3 Atomic note to `02_atomic_nodes/` and update `INDEX.md` + `AI_ROUTING_TABLE.md` if the user confirms with "y" or "yes".
+
+
+*   **Bắt buộc tra cứu tri thức nội bộ STAX trước, dùng nhãn [Tham khảo ngoài] cho tri thức ngoại vi và Cổng Xác thực trước khi cập nhật tri thức mới.**
+    *   1. **Ưu tiên Tri thức Nội bộ:** Luôn luôn quét `02_atomic_nodes/` và `03_neural_map/AI_ROUTING_TABLE.md` trước để lấy tài liệu gốc và dẫn nguồn bằng link Obsidian.
+    *   2. **Tham khảo ngoài:** Nếu không tìm thấy trong hệ thống Wiki, thông báo rõ và gắn nhãn `[Tham khảo ngoài - External Reference]` khi trích xuất thông tin từ codebase STAX_ASP hoặc tài liệu Clean Architecture chuẩn ngành.
+    *   3. **Cổng Xác thực Tương tác (Interactive Siphon Gate):** Nếu phát hiện tri thức ngoài quan trọng chưa có trong Wiki, bắt buộc hỏi ý kiến người dùng: *"Tôi phát hiện tri thức về [{topic}] chưa có trong kho tri thức STAX Wiki. Bạn có muốn đồng bộ và tạo một nốt nguyên tử mới cho chuyên đề này không? (y/N)"* trước khi tạo file mới hoặc cập nhật chỉ mục.
+    *   - Tránh làm loãng hoặc duplicate tri thức khi không cần thiết.
+    *   - Đảm bảo tính nhất quán của tri thức nội bộ luôn là nguồn chân lý duy nhất.
+    *   - Ngăn ngừa AI tự tiện đưa các mẫu thiết kế không tương thích hoặc boilerplate thừa thãi vào kho tri thức.
+    *   - Áp dụng làm quy tắc mặc định cho mọi lượt chat, mọi câu hỏi và mọi session xử lý thiết kế.
+    *   *Nguồn: memory/feedback_stax_knowledge_first.md*
