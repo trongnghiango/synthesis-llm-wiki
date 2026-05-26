@@ -25,7 +25,7 @@
   "delta_logging_optimization": "02dd382712771f0348114d333301decb40a26b590575851dbb7a618c8326cfbb",
   "finote_detail_api": "9d66876ef4490b642d2491acb478a3e800e193ae8992fab7069657436db7a8ed",
   "manual_entries": "efee193a039921bca64eba164beeebe55740eb1e1855954ef4bff146f963d6a4",
-  "standardization_and_cleanup": "e07c73ffd3c17d175c5bc85a68d918dac9b90e6477f0e0cc273458286ad9d18b",
+  "standardization_and_cleanup": "41f71f481b7e1b8713b4414fbba400bf3cc224cf1b14cdef61d0355440c9daf3",
   "finote_payment": "1e0ae9e9f44eb63442d00f0d01f5cc3b34defbfdc3bd21da238789a991ef6fcb",
   "accounting_foundation": "0c764eb6f50f97627bfe0184568b459b3a1a36a7e7424a15afa15a555b25c2e4",
   "crm_analytics_service": "0a75d7e7fabb58ca673b9591bf9de3f9ea15b95d9efefc2983e75d453e56bce7",
@@ -61,5 +61,6 @@
   "google_drive_multitenant_cleanup": "5ef4e4145183e916be730139345a811ab0618527abc3b3a9959b7384e9f2b09b",
   "tenant_isolation_casing_fix": "79cf3b8e0b646fccfee411065d35691afffa3aca24d7c53dfa7b73468e5ee1af",
   "crm_accounting_tenant_isolation_fix": "80c51134893a3cb6177c4e3883c0a2bb2cbe6cc059cd2dd21df04621bf9a8d54",
-  "schema_optimization": "8a238c0c889d29f90552438aa9704d0335240d2a1796677d558b107014395e97"
+  "schema_optimization": "8a238c0c889d29f90552438aa9704d0335240d2a1796677d558b107014395e97",
+  "rate_limiter": "463611d058160fb39ed191c3086765e52835214319551ac7bec1b999f067c77e"
 }

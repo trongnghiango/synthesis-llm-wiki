@@ -34,5 +34,6 @@ Title,Description,Labels,Start Date,End Date
 [Sprint 06] Integration Testing Toàn hệ thống,Chạy test nối các luồng từ Tạo Lead -> Báo giá -> Hợp đồng -> Finote.,"sprint-06, backend",2026-06-27,2026-07-03
 [Sprint 06] Tối ưu hóa UI/UX Phase 1,"Sửa lỗi giao diện, responsive cho Mobile/Tablet, loading states.","sprint-06, frontend",2026-07-01,2026-07-07
 [Sprint 06] Cập nhật API Documentation,Generate Swagger docs mới nhất để chuẩn bị bàn giao.,"sprint-06, backend",2026-07-06,2026-07-10
+[Sprint 06] Tích hợp Rate Limiter (Redis + Clean Architecture),"Xây dựng IRateLimiterPort, RateLimiterGuard, @RateLimit Decorator, Redis Adapter với Sliding Window. Tích hợp tenant-aware strategy qua ALS.","sprint-06, backend",2026-07-04,2026-07-08
 [Sprint 07] Setup Hạ tầng Production (VPS),"Cài đặt Docker, Redis, Postgres lên server thật.","sprint-07, backend",2026-07-11,2026-07-15
 [Sprint 07] Hỗ trợ UAT Phase 1,"Nhận bug từ STAX, tạo thẻ Bug và Fix trực tiếp.","sprint-07, bug",2026-07-14,2026-07-24

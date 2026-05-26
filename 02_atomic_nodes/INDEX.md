@@ -33,6 +33,7 @@ Chào mừng bạn đến với Layer 3 - Hệ thống **Nốt nguyên tử (Ato
 | [[arch-clean-boundaries]] | Ranh giới độc lập của 4 lớp Clean Architecture. | [[arch-modular-monolith-tiers]] | `#clean-arch` `#layers` |
 | [[arch-als-tenant-isolation]] | Cô lập Tenant tự động qua Async Local Storage (ALS) kết hợp phân giải động VisibilityContext. | [[arch-clean-boundaries]] | `#multi-tenancy` `#als` `#security` `#visibility-context` |
 | [[arch-als-transactions]] | Quản lý transactional boundary ngầm định qua ALS. | [[arch-als-tenant-isolation]] | `#transactions` `#als` |
+| [[arch-rate-limiting]] | Thiết kế kiến trúc Rate Limiter dạng Port/Adapter tích hợp Guard và Redis Sliding Window. | [[arch-als-tenant-isolation]] | `#architecture` `#rate-limiter` `#redis` `#security` |
 | [[arch-exception-handling]] | Luật xử lý và ném exception an toàn trong Clean Arch. | [[arch-clean-boundaries]] | `#exceptions` `#error` |
 
 ---
@@ -52,6 +53,7 @@ Chào mừng bạn đến với Layer 3 - Hệ thống **Nốt nguyên tử (Ato
 
 | Nốt Nguyên Tử | Tóm tắt (1 dòng) | Phụ thuộc | Tags |
 | :--- | :--- | :--- | :--- |
+| [[hb-standardization_and_cleanup]] | Lộ trình 11 Sprint phát triển hệ thống STAX (HRM, CRM, Finote, Audit Log, Tasks) tối ưu cho Solo-Developer. | *Tự động* | `#roadmap ` #hrm ` #crm ` #audit-log ` #finote ` #drizzle` |
 | [[hb-company_rbac_seeder]] | Đồng bộ hóa nhân sự, định biên vị trí và kế thừa quyền RBAC qua CLI seeder với cơ chế Smart Upsert. | *Tự động* | `#seeder ` #rbac ` #employee-sync ` #metadata-jsonb ` #nestjs` |
 | [[hb-db-cli-seeder]] | Tích hợp CLI tool gieo dữ liệu mẫu (seeder) trực tiếp qua pg Pool & Commander, tối ưu hóa tốc độ và an toàn unique constraint. | *Tự động* | `#cli ` #seeder ` #drizzle ` #pg-pool ` #developer-tooling` |
 | [[hb-stax-safe-update-pattern]] | Giải pháp Safe-Update tự động lọc bỏ các trường bất biến (id, audit, tenant) khi cập nhật dữ liệu để tránh lỗi ràng buộc Database. | *Tự động* | `#drizzle ` #repository ` #safe-update ` #database-constraint ` #refactoring` |
@@ -62,6 +64,7 @@ Chào mừng bạn đến với Layer 3 - Hệ thống **Nốt nguyên tử (Ato
 | [[hb-drizzle-base-repo]] | Triển khai Repository Adapter kế thừa từ Base Repo. | [[arch-clean-boundaries]], [[arch-als-tenant-isolation]] | `#drizzle` `#orm` |
 | [[hb-delta-logging]] | Ghi nhật ký thay đổi dữ liệu nghiệp vụ dạng Delta JSON. | *Không* | `#logging` `#delta-log` |
 | [[hb-rbac-permissions]] | Phân quyền vai trò tĩnh định dạng domain:resource:action. | *Không* | `#rbac` `#permissions` |
+| [[hb-rate-limiting]] | Hướng dẫn cấu hình và sử dụng Decorator @RateLimit trên backend NestJS. | [[arch-rate-limiting]] | `#handbook` `#rate-limiter` `#decorator` `#redis` |
 | [[hb-http-request-flow]] | Sơ đồ luồng chạy tuần tự của một HTTP Request qua NestJS. | [[arch-als-tenant-isolation]], [[hb-rbac-permissions]] | `#request-flow` `#nestjs` |
 
 ---

@@ -30,6 +30,8 @@ Khi bạn nhận được yêu cầu từ lập trình viên, hãy ánh xạ m�
     *   `[[hb-drizzle-base-repo]]` — Đường dẫn: [02_atomic_nodes/hb-drizzle-base-repo.md](../02_atomic_nodes/hb-drizzle-base-repo.md)
     *   `[[hb-db-cli-seeder]]` — Đường dẫn: [02_atomic_nodes/hb-db-cli-seeder.md](../02_atomic_nodes/hb-db-cli-seeder.md)
     *   `[[dom-schema-optimization]]` — Đường dẫn: [02_atomic_nodes/dom-schema-optimization.md](../02_atomic_nodes/dom-schema-optimization.md) — Tối ưu naming convention, composite indexes, unified attachments và multi-tenant seeder fix.
+    *   `[[hb-standardization_and_cleanup]]` — Đường dẫn: [02_atomic_nodes/hb-standardization_and_cleanup.md](../02_atomic_nodes/hb-standardization_and_cleanup.md)
+
 
 
 ### 🔐 3. Xác thực, Phân quyền & Request Flow
@@ -39,6 +41,8 @@ Khi bạn nhận được yêu cầu từ lập trình viên, hãy ánh xạ m�
     *   `[[hb-rbac-permissions]]` — Đường dẫn: [02_atomic_nodes/hb-rbac-permissions.md](../02_atomic_nodes/hb-rbac-permissions.md)
     *   `[[hb-http-request-flow]]` — Đường dẫn: [02_atomic_nodes/hb-http-request-flow.md](../02_atomic_nodes/hb-http-request-flow.md)
     *   `[[hb-company_rbac_seeder]]` — Đường dẫn: [02_atomic_nodes/hb-company_rbac_seeder.md](../02_atomic_nodes/hb-company_rbac_seeder.md)
+    *   `[[arch-rate-limiting]]` — Đường dẫn: [02_atomic_nodes/arch-rate-limiting.md](../02_atomic_nodes/arch-rate-limiting.md)
+    *   `[[hb-rate-limiting]]` — Đường dẫn: [02_atomic_nodes/hb-rate-limiting.md](../02_atomic_nodes/hb-rate-limiting.md)
 
 
 ### 📜 4. Logging & Kiểm toán nghiệp vụ (Audit Logging)
@@ -64,9 +68,9 @@ Khi bạn nhận được yêu cầu từ lập trình viên, hãy ánh xạ m�
 
 ## 🕸️ CHỈ MỤC TỪ KHÓA ĐỂ GREP NHANH (SEMANTIC TAGS INDEX)
 
-*   `#architecture` -> [[arch-modular-monolith-tiers]], [[arch-clean-boundaries]], [[arch-als-tenant-isolation]], [[arch-als-transactions]], [[arch-exception-handling]]
+*   `#architecture` -> [[arch-modular-monolith-tiers]], [[arch-clean-boundaries]], [[arch-als-tenant-isolation]], [[arch-als-transactions]], [[arch-exception-handling]], [[arch-rate-limiting]]
 *   `#standards` -> [[std-naming-rules]], [[std-import-boundaries]], [[std-api-contracts]], [[std-team-workflow]]
-*   `#handbooks` -> [[hb-drizzle-base-repo]], [[hb-delta-logging]], [[hb-rbac-permissions]], [[hb-http-request-flow]]
+*   `#handbooks` -> [[hb-drizzle-base-repo]], [[hb-delta-logging]], [[hb-rbac-permissions]], [[hb-http-request-flow]], [[hb-rate-limiting]]
 *   `#domain` -> [[dom-hrm-position-model]], [[dom-accounting-finote]], [[dom-crm-pipelines]]
 
 ---

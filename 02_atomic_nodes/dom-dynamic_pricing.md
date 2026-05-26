@@ -10,7 +10,8 @@ tags: [crm, dynamic-pricing, db-schema, lead-to-contract]
 ---
 
 ### 1. Thay đổi DB Schema (Drizzle)
-- **Cột mới**: `pricingModel` (Enum: `FIXED`, `MANUAL_AGREEMENT`, `TIERED_REVENUE`), `pricingConfig` (JSONB).
+- **Cột mới**: `pricingModel` (Enum: `FIXED`, `MANUAL_AGREEMENT`, `TIERED_REVENUE`), `pricingConfig` (JSONB - hoàn toàn nullable).
+- **Nguyên tắc nghiệp vụ thép**: `pricingConfig` và các cột số tiền (`unitPrice`, `amount`) **bắt buộc phải nullable** ở Database, Domain Entity và Zod/DTO Validation. Điều này cho phép Kế toán xử lý các hợp đồng không phải one-off (như thu phí dịch vụ hàng tháng theo doanh thu thực tế bậc thang `TIERED_REVENUE` hoặc thỏa thuận riêng `MANUAL_AGREEMENT`), nơi công thức và doanh thu chỉ xác định được khi phát sinh nghiệp vụ thực tế.
 - **File ảnh hưởng**:
   - `/home/ka/Repos/github.com/trongnghiango/STAX_ASP/backend/src/database/schema/crm/services.schema.ts` (đặt `basePrice` sang nullable).
   - `/home/ka/Repos/github.com/trongnghiango/STAX_ASP/backend/src/database/schema/crm/contract-items.schema.ts` (đặt `unitPrice`, `amount` sang nullable).
